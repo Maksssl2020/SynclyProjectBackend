@@ -1,0 +1,78 @@
+package com.synclyplatform.synclyprojectbackend.service.tag;
+
+import com.synclyplatform.synclyprojectbackend.dto.tag.CommonTagRequestDTO;
+import com.synclyplatform.synclyprojectbackend.dto.tag.MainTagRequestDTO;
+import com.synclyplatform.synclyprojectbackend.dto.tag.TagDTO;
+import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
+import com.synclyplatform.synclyprojectbackend.model.tag.TagType;
+import com.synclyplatform.synclyprojectbackend.model.tag_category.TagCategory;
+import com.synclyplatform.synclyprojectbackend.repository.TagCategoryRepository;
+import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class TagServiceImpl implements TagService {
+
+    private final TagRepository tagRepository;
+    private final TagCategoryRepository tagCategoryRepository;
+
+    @Override
+    public void saveMainTag(MainTagRequestDTO mainTagRequest) {
+        if (!tagExists(mainTagRequest.getName())) {
+            TagCategory tagCategory = tagCategoryRepository.findByName(mainTagRequest.getTagCategoryName())
+                    .orElseThrow(() -> new RuntimeException(String.format("Tag category %s name not found.",  mainTagRequest.getTagCategoryName())));
+
+            Tag tag = Tag.builder()
+                    .name(mainTagRequest.getName())
+                    .description(mainTagRequest.getDescription())
+                    .trending(mainTagRequest.isTrending())
+                    .tagCategory(tagCategory)
+                    .type(TagType.MAIN)
+                    .build();
+
+            tagRepository.save(tag);
+        }
+    }
+
+    @Override
+    public void saveCommonTag(CommonTagRequestDTO commonTagRequest) {
+        if (!tagExists(commonTagRequest.getName())) {
+            Tag tag = Tag.builder()
+                    .name(commonTagRequest.getName())
+                    .type(TagType.COMMON)
+                    .build();
+
+            tagRepository.save(tag);
+        }
+    }
+
+    @Override
+    public List<TagDTO> findAllTags() {
+        return tagRepository.findAll().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean tagExists(String tagName) {
+        return tagRepository.countByName(tagName) > 0;
+    }
+
+    public TagDTO toDTO(Tag tag) {
+        return TagDTO.builder()
+                .id(tag.getId())
+                .name(tag.getName())
+                .description(tag.getDescription())
+                .trending(tag.isTrending())
+                .postsCount(0)
+                .followersCount(0)
+                .type(tag.getType().toString())
+                .tagCategory(tag.getTagCategory().getName())
+                .build();
+    }
+}

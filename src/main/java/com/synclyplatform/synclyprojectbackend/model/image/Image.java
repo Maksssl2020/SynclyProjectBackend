@@ -1,10 +1,11 @@
-package com.synclyplatform.synclyprojectbackend.model;
+package com.synclyplatform.synclyprojectbackend.model.image;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 
 @Data
 @Entity
@@ -18,8 +19,10 @@ public class Image {
     private Long imageId;
 
     @Lob
-    @Column(nullable = false)
     private byte[] imageData;
 
+    @URL(message = "Please provide a valid URL.")
+    private String url;
 
+    private String mimeType;
 }

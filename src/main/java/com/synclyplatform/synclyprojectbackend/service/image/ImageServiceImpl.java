@@ -1,6 +1,6 @@
 package com.synclyplatform.synclyprojectbackend.service.image;
 
-import com.synclyplatform.synclyprojectbackend.model.Image;
+import com.synclyplatform.synclyprojectbackend.model.image.Image;
 import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
 import com.synclyplatform.synclyprojectbackend.repository.ImageRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserProfileRepository;

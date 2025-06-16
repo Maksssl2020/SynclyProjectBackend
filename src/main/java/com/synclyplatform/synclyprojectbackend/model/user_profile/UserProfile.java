@@ -1,6 +1,6 @@
 package com.synclyplatform.synclyprojectbackend.model.user_profile;
 
-import com.synclyplatform.synclyprojectbackend.model.Image;
+import com.synclyplatform.synclyprojectbackend.model.image.Image;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
