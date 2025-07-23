@@ -16,10 +16,14 @@ import java.util.List;
 public class PostDTO {
 
     private Long id;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private String createdAt;
+    private String updatedAt;
     private String postType;
     private Long authorId;
     private String authorName;
+    private String authorUsername;
     private List<String> tags;
+    private List<Long> likesBy;
+    private List<Long> savedBy;
+    private long commentsCount;
 }

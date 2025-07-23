@@ -1,18 +1,30 @@
 package com.synclyplatform.synclyprojectbackend.service.user;
 
+import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.model.user.UserStatus;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
+import com.synclyplatform.synclyprojectbackend.utils.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
+
+    @Override
+    public UserDTO findUserById(Long id) {
+        User foundUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found."));
+
+        return userMapper.toDTO(foundUser);
+    }
 
     @Override
     public User disconnect(long userId) {
@@ -31,5 +43,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> findConnectedUsers() {
         return userRepository.findAllByStatus(UserStatus.ONLINE);
+    }
+
+    @Override
+    public List<UserDTO> searchUsers(String query) {
+        return userRepository.searchUserByQuery(query).stream()
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }

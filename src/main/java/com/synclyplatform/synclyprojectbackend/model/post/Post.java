@@ -1,18 +1,20 @@
 package com.synclyplatform.synclyprojectbackend.model.post;
 
+import com.synclyplatform.synclyprojectbackend.model.like.UserPostLike;
 import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-@Data
+@Setter
+@Getter
 @Entity
 @SuperBuilder
 @AllArgsConstructor
@@ -37,6 +39,12 @@ public class Post {
 
     @ManyToMany
     private List<Tag> tags;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserPostLike> likes = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "savedPosts")
+    private Set<User> savedByUsers = new HashSet<>();
 
     @PrePersist
     public void onCreate() {

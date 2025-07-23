@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class PhotoPostRequestDTO extends PostRequestDTO{
+public class PhotoPostRequestDTO extends PostRequestDTO {
 
     @NotBlank(message = "Caption cannot be empty.")
     private String caption;

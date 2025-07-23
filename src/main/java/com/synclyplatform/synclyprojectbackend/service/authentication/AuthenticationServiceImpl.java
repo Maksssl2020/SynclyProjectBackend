@@ -2,16 +2,21 @@ package com.synclyplatform.synclyprojectbackend.service.authentication;
 
 import com.synclyplatform.synclyprojectbackend.dto.authentication.AuthenticationRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.authentication.AuthenticationResponseDTO;
+import com.synclyplatform.synclyprojectbackend.dto.authentication.ChangePasswordRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.authentication.RegisterRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileRequestDTO;
 import com.synclyplatform.synclyprojectbackend.exception.UserAlreadyExistsException;
+import com.synclyplatform.synclyprojectbackend.model.post_collection.PostCollection;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.model.user.UserRole;
 import com.synclyplatform.synclyprojectbackend.model.user.UserStatus;
 import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
+import com.synclyplatform.synclyprojectbackend.model.user_settings.UserSettings;
+import com.synclyplatform.synclyprojectbackend.repository.PostCollectionRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import com.synclyplatform.synclyprojectbackend.security.JwtService;
 import com.synclyplatform.synclyprojectbackend.service.user_profile.UserProfileService;
+import com.synclyplatform.synclyprojectbackend.service.user_settings.UserSettingsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,6 +36,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserProfileService userProfileService;
+    private final UserSettingsService userSettingsService;
+    private final PostCollectionRepository postCollectionRepository;
 
     @Override
     public void register(RegisterRequestDTO registerRequest) throws Exception {
@@ -55,9 +62,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                         .userId(user.getUserId())
                         .build()
         );
-        
+
+        UserSettings userSettings = userSettingsService.createUserSettings(user.getUserId());
+
+        PostCollection postCollection = PostCollection.builder()
+                .title("ALL")
+                .color("#14b8a6")
+                .isDefault(true)
+                .user(user)
+                .build();
+
+        user.getPostCollections().add(postCollection);
+
         user.setUserProfile(userProfile);
+        user.setUserSettings(userSettings);
+
         userRepository.save(user);
+        postCollectionRepository.save(postCollection);
     }
 
     private void validateRegisterRequest(RegisterRequestDTO registerRequest) {
@@ -81,6 +102,29 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = (User) authentication.getPrincipal();
         user.setStatus(UserStatus.ONLINE);
         return createAuthenticationResponse(user);
+    }
+
+    @Override
+    public void changePassword(Long userId, ChangePasswordRequestDTO changePasswordRequest) throws Exception {
+        User foundUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        if (!passwordEncoder.matches(changePasswordRequest.getOldPassword(), foundUser.getPassword())) {
+            throw new Exception("Incorrect old password!");
+        }
+
+        foundUser.setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+        userRepository.save(foundUser);
+    }
+
+    @Override
+    public boolean usernameExists(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    @Override
+    public boolean emailExists(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     private AuthenticationResponseDTO createAuthenticationResponse(User user) {

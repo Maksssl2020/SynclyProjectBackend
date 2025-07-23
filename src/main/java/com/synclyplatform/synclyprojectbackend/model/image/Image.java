@@ -18,7 +18,7 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long imageId;
 
-    @Lob
+    @Column(columnDefinition = "bytea")
     private byte[] imageData;
 
     @URL(message = "Please provide a valid URL.")

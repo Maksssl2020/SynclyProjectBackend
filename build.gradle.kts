@@ -42,6 +42,10 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-jackson:0.12.5")
     implementation("org.mapstruct:mapstruct:1.6.3")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
+    implementation("org.jsoup:jsoup:1.21.1")
+    implementation("net.datafaker:datafaker:2.4.4")
+    implementation("commons-io:commons-io:2.20.0")
+    implementation("org.springframework:spring-test")
 }
 
 tasks.withType<Test> {

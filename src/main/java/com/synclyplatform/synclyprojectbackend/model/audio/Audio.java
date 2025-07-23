@@ -21,7 +21,7 @@ public class Audio {
     @URL(message = "Please provide a valid URL.")
     private String url;
 
-    @Lob
+    @Column(columnDefinition = "bytea")
     private byte[] audioData;
 
     private String mimeType;

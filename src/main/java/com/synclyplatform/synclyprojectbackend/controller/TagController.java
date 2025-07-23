@@ -5,6 +5,7 @@ import com.synclyplatform.synclyprojectbackend.dto.tag.MainTagRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.tag.TagDTO;
 import com.synclyplatform.synclyprojectbackend.service.tag.TagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +23,11 @@ public class TagController {
     @GetMapping
     public ResponseEntity<List<TagDTO>> getAllTags() {
         return ResponseEntity.ok(tagService.findAllTags());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<TagDTO>> searchTagsByQuery(@Param("query") String query) {
+        return new ResponseEntity<>(tagService.searchTags(query), HttpStatus.OK);
     }
 
     @GetMapping("/exists/{name}")

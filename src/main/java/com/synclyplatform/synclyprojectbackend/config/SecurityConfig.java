@@ -32,7 +32,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests.requestMatchers(
                                 "/api/v1/authentication/**",
-                                "/ws/**"
+                                "/ws/**",
+                                "/api/v1/generate-data/**"
                         ).permitAll().anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

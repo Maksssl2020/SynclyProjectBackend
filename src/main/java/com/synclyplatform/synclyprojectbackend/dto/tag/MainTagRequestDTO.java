@@ -17,6 +17,9 @@ public class MainTagRequestDTO {
     private String description;
     private boolean trending;
 
+    @NotBlank(message = "Color cannot be blank.")
+    private String color;
+
     @NotBlank(message = "Category name cannot be empty.")
     private String tagCategoryName;
 }

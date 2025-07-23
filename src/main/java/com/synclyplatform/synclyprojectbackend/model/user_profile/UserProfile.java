@@ -3,18 +3,17 @@ package com.synclyplatform.synclyprojectbackend.model.user_profile;
 import com.synclyplatform.synclyprojectbackend.model.image.Image;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-@Entity
 @Data
+@Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(exclude = "user")
 public class UserProfile {
 
     @Id
@@ -25,6 +24,7 @@ public class UserProfile {
     private String bio;
     private String location;
     private LocalDate birthday;
+    private String website;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "image_id")
@@ -33,4 +33,7 @@ public class UserProfile {
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToMany(mappedBy = "followedUsers")
+    private List<User> followers;
 }

@@ -1,12 +1,19 @@
 package com.synclyplatform.synclyprojectbackend.service.user_profile;
 
+import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileRequestDTO;
+import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileUpdateRequestDTO;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
 import com.synclyplatform.synclyprojectbackend.repository.UserProfileRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
+import com.synclyplatform.synclyprojectbackend.service.authentication.AuthenticationService;
+import com.synclyplatform.synclyprojectbackend.service.media.MediaService;
+import com.synclyplatform.synclyprojectbackend.utils.UserProfileMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -14,6 +21,17 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
+    private final UserProfileMapper userProfileMapper;
+    private final MediaService mediaService;
+
+    @Override
+    @Transactional
+    public UserProfileDTO findByUserId(long userId) {
+        UserProfile foundUserProfile = userProfileRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new RuntimeException("User Profile Not Found!"));
+
+        return userProfileMapper.toDTO(foundUserProfile);
+    }
 
     @Override
     public UserProfile createUserProfile(UserProfileRequestDTO userProfileRequest) throws Exception {
@@ -26,5 +44,40 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .build();
 
         return userProfileRepository.save(userProfile);
+    }
+
+    @Override
+    public void uploadAvatar(MultipartFile avatarFile, Long userId) {
+        mediaService.saveUserAvatar(userId, avatarFile);
+    }
+
+    @Override
+    public void updateUserProfile(Long userId, UserProfileUpdateRequestDTO userProfileUpdateRequest) throws Exception {
+        User foundUser = userRepository.findById(userId)
+                .orElseThrow(() -> new Exception("User Not Found."));
+        UserProfile foundUserProfile = userProfileRepository.findByUser_UserId(userId)
+                .orElseThrow(() -> new Exception("User Profile Not Found."));
+
+        if (userProfileUpdateRequest.getDisplayName() != null) {
+            foundUserProfile.setDisplayName(userProfileUpdateRequest.getDisplayName());
+        }
+        if (userProfileUpdateRequest.getBio() != null) {
+            foundUserProfile.setBio(userProfileUpdateRequest.getBio());
+        }
+        if (userProfileUpdateRequest.getWebsite() != null) {
+            foundUserProfile.setWebsite(userProfileUpdateRequest.getWebsite());
+        }
+        if (userProfileUpdateRequest.getLocation() != null) {
+            foundUserProfile.setLocation(userProfileUpdateRequest.getLocation());
+        }
+        if (userProfileUpdateRequest.getEmail() != null) {
+            foundUser.setEmail(userProfileUpdateRequest.getEmail());
+        }
+        if (userProfileUpdateRequest.getUsername() != null) {
+            foundUser.setUsername(userProfileUpdateRequest.getUsername());
+        }
+
+        userProfileRepository.save(foundUserProfile);
+        userRepository.save(foundUser);
     }
 }

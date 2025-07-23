@@ -19,7 +19,7 @@ public class Video {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Lob
+    @Column(columnDefinition = "bytea")
     private byte[] videoData;
 
     @URL(message = "Please provide a valid URL.")

@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
-public class PhotoPostDTO extends PostDTO{
+public class PhotoPostDTO extends PostDTO {
 
     private String caption;
     private List<String> imageUrls;

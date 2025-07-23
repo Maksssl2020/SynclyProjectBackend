@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -19,4 +21,6 @@ public class TagDTO {
     private boolean trending;
     private String type;
     private String tagCategory;
+    private String color;
+    private String createdAt;
 }

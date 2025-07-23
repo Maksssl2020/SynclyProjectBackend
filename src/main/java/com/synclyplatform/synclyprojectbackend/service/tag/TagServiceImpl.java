@@ -8,6 +8,7 @@ import com.synclyplatform.synclyprojectbackend.model.tag.TagType;
 import com.synclyplatform.synclyprojectbackend.model.tag_category.TagCategory;
 import com.synclyplatform.synclyprojectbackend.repository.TagCategoryRepository;
 import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
+import com.synclyplatform.synclyprojectbackend.utils.TagMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
     private final TagCategoryRepository tagCategoryRepository;
+    private final TagMapper tagMapper;
 
     @Override
     public void saveMainTag(MainTagRequestDTO mainTagRequest) {
@@ -32,6 +34,7 @@ public class TagServiceImpl implements TagService {
                     .description(mainTagRequest.getDescription())
                     .trending(mainTagRequest.isTrending())
                     .tagCategory(tagCategory)
+                    .color(mainTagRequest.getColor())
                     .type(TagType.MAIN)
                     .build();
 
@@ -54,25 +57,19 @@ public class TagServiceImpl implements TagService {
     @Override
     public List<TagDTO> findAllTags() {
         return tagRepository.findAll().stream()
-                .map(this::toDTO)
+                .map(tagMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TagDTO> searchTags(String query) {
+        return tagRepository.searchTagByQuery(query).stream()
+                .map(tagMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public boolean tagExists(String tagName) {
         return tagRepository.countByName(tagName) > 0;
-    }
-
-    public TagDTO toDTO(Tag tag) {
-        return TagDTO.builder()
-                .id(tag.getId())
-                .name(tag.getName())
-                .description(tag.getDescription())
-                .trending(tag.isTrending())
-                .postsCount(0)
-                .followersCount(0)
-                .type(tag.getType().toString())
-                .tagCategory(tag.getTagCategory().getName())
-                .build();
     }
 }

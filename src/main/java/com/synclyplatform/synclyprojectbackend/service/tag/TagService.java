@@ -13,5 +13,6 @@ public interface TagService {
     void saveMainTag(MainTagRequestDTO mainTagRequest);
     void saveCommonTag(CommonTagRequestDTO commonTagRequest);
     List<TagDTO> findAllTags();
+    List<TagDTO> searchTags(String query);
     boolean tagExists(String tagName);
 }
