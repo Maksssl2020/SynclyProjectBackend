@@ -4,14 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synclyplatform.synclyprojectbackend.dto.media.MediaRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.post.*;
-import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,10 +33,23 @@ public class PostController {
     }
 
     @GetMapping("/user/dashboard/{userId}")
-    public ResponseEntity<List<PostDTO>> getRandomPostsForUserDashboardByUserId(@PathVariable Long userId) {
-        return new ResponseEntity<>(postService.getRandomPostsForUserDashboard(userId), HttpStatus.OK);
+    public ResponseEntity<List<PostDTO>> getUserForYouFeed(
+            @PathVariable Long userId,
+            @RequestParam("offset") int offset,
+            @RequestParam("limit") int limit
+    ) {
+        return new ResponseEntity<>(postService.getForYouFeed(userId, offset, limit), HttpStatus.OK);
     }
 
+
+    @GetMapping("/user/{userId}/feed/following")
+    public ResponseEntity<List<PostDTO>> getUserFollowedFeed(
+            @PathVariable Long userId,
+            @RequestParam("offset") int offset,
+            @RequestParam("limit") int limit
+    ) {
+        return new ResponseEntity<>(postService.getFollowedFeed(userId, offset, limit), HttpStatus.OK);
+    }
 
     @PostMapping(value = "/create/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<HttpStatus> createPost(
@@ -56,9 +66,6 @@ public class PostController {
             photoDto.setPhotos(mediaList);
         }
 
-        if (postRequestDTO instanceof AudioPostRequestDTO audioDto && files != null && files.size() == 1) {
-            audioDto.setAudio(new MediaRequestDTO(null, files.get(0), com.synclyplatform.synclyprojectbackend.dto.media.MediaType.AUDIO));
-        }
 
         if (postRequestDTO instanceof VideoPostRequestDTO videoDto && files != null) {
             List<MediaRequestDTO> videoList = files.stream()

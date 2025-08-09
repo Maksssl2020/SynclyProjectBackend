@@ -4,7 +4,6 @@ import com.synclyplatform.synclyprojectbackend.dto.media.MediaRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.media.MediaType;
 import com.synclyplatform.synclyprojectbackend.model.audio.Audio;
 import com.synclyplatform.synclyprojectbackend.model.image.Image;
-import com.synclyplatform.synclyprojectbackend.model.post.AudioPost;
 import com.synclyplatform.synclyprojectbackend.model.post.PhotoPost;
 import com.synclyplatform.synclyprojectbackend.model.post.VideoPost;
 import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
@@ -19,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.apache.commons.io.IOUtils;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -110,16 +109,6 @@ public class MediaServiceImpl implements MediaService {
             );
         } catch (Exception exception) {
             throw new RuntimeException(exception);
-        }
-    }
-
-    @Override
-    public void savePostAudio(AudioPost audioPost, MediaRequestDTO mediaRequestDTO) {
-        if (mediaRequestDTO.getMediaType().equals(MediaType.AUDIO)) {
-            Audio audioEntity = createAudio(mediaRequestDTO);
-
-            audioRepository.save(audioEntity);
-            audioPost.setAudio(audioEntity);
         }
     }
 

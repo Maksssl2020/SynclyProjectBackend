@@ -21,7 +21,6 @@ import java.util.List;
         @JsonSubTypes.Type(value = QuotePostRequestDTO.class, name = "quote"),
         @JsonSubTypes.Type(value = PhotoPostRequestDTO.class, name = "photo"),
         @JsonSubTypes.Type(value = VideoPostRequestDTO.class, name = "video"),
-        @JsonSubTypes.Type(value = AudioPostRequestDTO.class, name = "audio"),
         @JsonSubTypes.Type(value = LinkPostRequestDTO.class, name = "link")
 })
 public class PostRequestDTO {

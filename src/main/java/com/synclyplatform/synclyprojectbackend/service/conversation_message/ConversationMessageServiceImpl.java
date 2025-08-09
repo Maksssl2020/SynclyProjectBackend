@@ -22,6 +22,18 @@ public class ConversationMessageServiceImpl implements ConversationMessageServic
     private final ConversationService conversationService;
 
     @Override
+    public void markAsRead(String conversationId, String username) {
+
+        List<ConversationMessage> unreadMessages = conversationMessageRepository.findUnreadMessages(conversationId, username);
+        for (ConversationMessage conversationMessage : unreadMessages) {
+            conversationMessage.setRead(true);
+            conversationMessage.setSeenAt(LocalDateTime.now().toString());
+        }
+
+        conversationMessageRepository.saveAll(unreadMessages);
+    }
+
+    @Override
     public ConversationMessage save(ConversationMessageRequestDTO conversationMessageRequest) throws Exception {
         User foundSender = userRepository.findByUsername(conversationMessageRequest.getSenderUsername())
                 .orElseThrow(() -> new Exception("Sender not found."));
@@ -40,7 +52,8 @@ public class ConversationMessageServiceImpl implements ConversationMessageServic
                 .recipientUsername(conversationMessageRequest.getRecipientUsername())
                 .recipientUserId(foundRecipient.getUserId())
                 .senderUserId(foundSender.getUserId())
-                .timestamp(LocalDateTime.now())
+                .timestamp(LocalDateTime.now().toString())
+                .content(conversationMessageRequest.getMessage())
                 .build();
 
         conversationMessageRepository.save(conversationMessage);
@@ -59,11 +72,32 @@ public class ConversationMessageServiceImpl implements ConversationMessageServic
         return conversationMessageRepository.findAllByConversationId(conversationId);
     }
 
+    @Override
+    public List<ConversationMessage> findConversationMessages(User user, Long recipientId) throws Exception {
+        String conversationId = getConversationId(
+                user,
+                recipientId,
+                false
+        );
+
+        return conversationMessageRepository.findAllByConversationId(conversationId);
+    }
+
     private String getConversationId(String senderUsername, String recipientUsername, boolean createNewConversationIfNotExists) throws Exception {
         return conversationService
                 .getConversationId(
                         senderUsername,
                         recipientUsername,
+                        createNewConversationIfNotExists
+                )
+                .orElseThrow(() -> new Exception("Cannot find conversation."));
+    }
+
+    private String getConversationId(User user, Long recipientId, boolean createNewConversationIfNotExists) throws Exception {
+        return conversationService
+                .getConversationId(
+                        user.getUserId(),
+                        recipientId,
                         createNewConversationIfNotExists
                 )
                 .orElseThrow(() -> new Exception("Cannot find conversation."));

@@ -33,7 +33,9 @@ public class SecurityConfig {
                         authorizeRequests.requestMatchers(
                                 "/api/v1/authentication/**",
                                 "/ws/**",
-                                "/api/v1/generate-data/**"
+                                "/api/v1/generate-data/**",
+                                "/api/v1/tags/popular",
+                                "/api/v1/tags/trending"
                         ).permitAll().anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

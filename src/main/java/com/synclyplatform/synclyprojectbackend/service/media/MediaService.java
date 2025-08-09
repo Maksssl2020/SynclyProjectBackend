@@ -1,7 +1,6 @@
 package com.synclyplatform.synclyprojectbackend.service.media;
 
 import com.synclyplatform.synclyprojectbackend.dto.media.MediaRequestDTO;
-import com.synclyplatform.synclyprojectbackend.model.post.AudioPost;
 import com.synclyplatform.synclyprojectbackend.model.post.PhotoPost;
 import com.synclyplatform.synclyprojectbackend.model.post.VideoPost;
 import org.springframework.stereotype.Service;
@@ -14,7 +13,6 @@ public interface MediaService {
 
     void saveUserAvatar(Long userId, MultipartFile image);
     void savePostPhotos(PhotoPost photoPost, List<MediaRequestDTO> mediaRequestDTOList);
-    void savePostAudio(AudioPost audioPost, MediaRequestDTO mediaRequestDTO);
     void savePostVideos(VideoPost videoPost, List<MediaRequestDTO> mediaRequestDTOList);
     MultipartFile base64ToMultipartFile(String base64, String fileName);
 }

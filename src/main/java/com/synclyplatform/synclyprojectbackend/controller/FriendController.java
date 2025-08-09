@@ -3,6 +3,7 @@ package com.synclyplatform.synclyprojectbackend.controller;
 import com.synclyplatform.synclyprojectbackend.dto.friend.FriendDTO;
 import com.synclyplatform.synclyprojectbackend.dto.friend.FriendUserDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
+import com.synclyplatform.synclyprojectbackend.model.friend.FriendStatus;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.service.friend.FriendService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,16 @@ public class FriendController {
         return new ResponseEntity<>(friendService.getFriendList(user.getUserId()), HttpStatus.OK);
     }
 
+    @GetMapping("/ids")
+    public ResponseEntity<List<Long>> getFriendIdsList(@AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(friendService.getUserFiendIds(user.getUserId()), HttpStatus.OK);
+    }
+
+    @GetMapping("/sent")
+    public ResponseEntity<List<FriendDTO>> getSentRequests(@AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(friendService.getSentRequests(user.getUserId()), HttpStatus.OK);
+    }
+
     @GetMapping("/pending")
     public ResponseEntity<List<FriendDTO>> getPendingRequests(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(friendService.getPendingRequests(user.getUserId()), HttpStatus.OK);
@@ -33,6 +44,11 @@ public class FriendController {
     @GetMapping("/suggested")
     public ResponseEntity<List<UserDTO>> getSuggestedRequests(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(friendService.getSuggestedFriends(user.getUserId()), HttpStatus.OK);
+    }
+
+    @GetMapping("/request/status/{userId}")
+    public ResponseEntity<String> getRequestStatus(@AuthenticationPrincipal User user, @PathVariable Long userId) {
+        return new ResponseEntity<>(friendService.getRequestStatus(user.getUserId(), userId), HttpStatus.OK);
     }
 
     @PostMapping("/send/request")
@@ -75,6 +91,12 @@ public class FriendController {
             @RequestParam("friendId") Long friendId
     ) {
         friendService.removeFriend(userId, friendId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("/remove/request/{receiverId}")
+    public ResponseEntity<HttpStatus> removeFriendRequest(@AuthenticationPrincipal User user, @PathVariable Long receiverId) {
+        friendService.removeRequest(user.getUserId(), receiverId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

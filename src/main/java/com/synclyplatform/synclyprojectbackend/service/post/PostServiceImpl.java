@@ -2,15 +2,23 @@ package com.synclyplatform.synclyprojectbackend.service.post;
 
 import com.synclyplatform.synclyprojectbackend.dto.post.*;
 import com.synclyplatform.synclyprojectbackend.model.post.*;
+import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
+import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
 import com.synclyplatform.synclyprojectbackend.repository.PostRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import com.synclyplatform.synclyprojectbackend.service.media.MediaService;
 import com.synclyplatform.synclyprojectbackend.utils.PostMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,14 +60,6 @@ public class PostServiceImpl implements PostService {
                 mappedPhotoPost.setPostType(PostType.PHOTO);
                 postRepository.save(mappedPhotoPost);
             }
-            case AudioPostRequestDTO audioPostRequestDTO -> {
-                AudioPost mappedAudioPost = postMapper.fromRequestDto(audioPostRequestDTO);
-
-                mappedAudioPost.setAuthor(foundUser);
-                mediaService.savePostAudio(mappedAudioPost, audioPostRequestDTO.getAudio());
-                mappedAudioPost.setPostType(PostType.MUSIC);
-                postRepository.save(mappedAudioPost);
-            }
             case VideoPostRequestDTO videoPostRequestDTO -> {
                 VideoPost mappedVideoPost = postMapper.fromRequestDto(videoPostRequestDTO);
 
@@ -95,8 +95,39 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDTO> getRandomPostsForUserDashboard(Long userId) {
-        return postRepository.findRandomPostsExcludingUser(userId, 100).stream()
+    public List<PostDTO> getForYouFeed(Long userId, int offset, int limit) {
+        Long minId = postRepository.findMinPostId();
+        Long maxId = postRepository.findMaxPostId();
+
+        if (minId == null || maxId == null) return List.of();
+
+        Long randomStartId = ThreadLocalRandom.current().nextLong(minId, maxId + 1);
+        Pageable pageable = PageRequest.of(offset, limit);
+
+        List<Post> posts = postRepository.findRandomPostsFromId(userId, randomStartId, pageable);
+
+        if (posts.size() < limit) {
+            List<Post> fallback = postRepository.findRandomPostsFromId(userId, minId, pageable);
+            posts.addAll(fallback.subList(0, Math.min(limit - posts.size(), fallback.size())));
+        }
+
+        return posts.stream().map(postMapper::toDto).toList();
+    }
+
+    @Override
+    public List<PostDTO> getFollowedFeed(Long userId, int offset, int limit) {
+        User foundUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Set<Long> followedUsersIds = new HashSet<>(foundUser.getFollowedUsers().stream().map(UserProfile::getUser).map(User::getUserId).toList());
+        Set<Long> followedTagsIds = new HashSet<>(foundUser.getFollowedTags().stream().map(Tag::getId).toList());
+
+        if (followedUsersIds.isEmpty() && followedTagsIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return postRepository.findPostsByAuthorsOrTags(followedUsersIds, followedTagsIds, PageRequest.of(offset, limit))
+                .stream()
                 .map(postMapper::toDto)
                 .collect(Collectors.toList());
     }

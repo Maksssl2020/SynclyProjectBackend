@@ -29,5 +29,7 @@ public class ConversationMessage {
     private String senderUsername;
     private String recipientUsername;
     private String content;
-    private LocalDateTime timestamp;
+    private String timestamp;
+    private boolean read;
+    private String seenAt;
 }

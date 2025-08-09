@@ -66,6 +66,10 @@ public class User implements UserDetails {
     private UserSettings userSettings;
 
     @ManyToMany
+    @JoinTable(name = "user_followed_tags",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
     private List<Tag> followedTags = new ArrayList<>();
 
     @ManyToMany

@@ -19,9 +19,18 @@ public class DataGeneratorController {
     private final DataGeneratorService dataGeneratorService;
 
     @PostMapping("/users/{count}")
-    public ResponseEntity<HttpStatus> generateUsers(@PathVariable int count) throws MalformedURLException {
+    public ResponseEntity<HttpStatus> generateUsers(@PathVariable int count) {
         for (int i = 0; i < count; i++) {
             dataGeneratorService.generateUser();
+        }
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PostMapping("/posts/{count}")
+    public ResponseEntity<HttpStatus> generateUserPosts(@PathVariable int count) {
+        for (int i = 0; i < count; i++) {
+            dataGeneratorService.generateUserPosts();
         }
 
         return new ResponseEntity<>(HttpStatus.CREATED);

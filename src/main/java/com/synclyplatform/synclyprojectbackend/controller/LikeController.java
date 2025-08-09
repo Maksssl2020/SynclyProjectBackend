@@ -1,9 +1,11 @@
 package com.synclyplatform.synclyprojectbackend.controller;
 
+import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.service.user_post_like.LikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,14 +19,14 @@ public class LikeController {
     private final LikeService likeService;
 
     @PostMapping("/like/post")
-    public ResponseEntity<HttpStatus> likePost(@RequestParam("userId") Long userId, @RequestParam("postId") Long postId) {
-        likeService.likePost(userId, postId);
+    public ResponseEntity<HttpStatus> likePost(@AuthenticationPrincipal User user, @RequestParam("postId") Long postId) {
+        likeService.likePost(user, postId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/like/comment")
-    public ResponseEntity<HttpStatus> likeComment(@RequestParam("userId") Long userId, @RequestParam("commentId") Long commentId) {
-        likeService.likePostComment(userId, commentId);
+    public ResponseEntity<HttpStatus> likeComment(@AuthenticationPrincipal User user, @RequestParam("commentId") Long commentId) {
+        likeService.likePostComment(user, commentId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

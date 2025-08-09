@@ -7,5 +7,6 @@ import java.net.MalformedURLException;
 
 @Service
 public interface DataGeneratorService {
-    User generateUser() throws MalformedURLException;
+    void generateUser() ;
+    void generateUserPosts() ;
 }

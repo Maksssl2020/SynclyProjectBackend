@@ -1,8 +1,8 @@
 package com.synclyplatform.synclyprojectbackend.service.follow;
 
 import com.synclyplatform.synclyprojectbackend.dto.tag.TagDTO;
+import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileDTO;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -10,6 +10,9 @@ import java.util.List;
 public interface FollowService {
 
     List<TagDTO> getFollowedTags(Long userId);
+    List<UserProfileDTO> getFollowedUsers(Long userId);
     void followTag(Long userId, Long tagId);
     void unfollowTag(Long userId, Long tagId);
+    void followUser(Long userId, Long followedUserId);
+    void unfollowUser(Long userId, Long followedUserId);
 }

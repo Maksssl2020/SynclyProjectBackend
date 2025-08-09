@@ -26,20 +26,17 @@ public class LikeServiceImpl implements LikeService {
     private final UserCommentLikeRepository userCommentLikeRepository;
 
     @Override
-    public void likePost(long postId, long userId) {
-        if (userPostLikeRepository.existsByPostIdAndUserUserId(postId, userId)) {
+    public void likePost(User user, long postId) {
+        if (userPostLikeRepository.existsByPostIdAndUserUserId(postId, user.getUserId())) {
             return;
         }
-
-        User foundUser = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Post foundPost = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
         UserPostLike userPostLike = UserPostLike.builder()
                 .post(foundPost)
-                .user(foundUser)
+                .user(user)
                 .likedAt(LocalDateTime.now())
                 .build();
 
@@ -68,19 +65,16 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
-    public void likePostComment(long userId, long postCommentId) {
-        if (userCommentLikeRepository.existsByPostCommentIdAndUserUserId(postCommentId, userId)) {
+    public void likePostComment(User user, long postCommentId) {
+        if (userCommentLikeRepository.existsByPostCommentIdAndUserUserId(postCommentId, user.getUserId())) {
             return;
         }
-
-        User foundUser = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
         PostComment foundPostComment = postCommentRepository.findById(postCommentId)
                 .orElseThrow(() -> new RuntimeException("Post comment not found"));
 
         UserCommentLike userCommentLike = UserCommentLike.builder()
-                .user(foundUser)
+                .user(user)
                 .postComment(foundPostComment)
                 .likedAt(LocalDateTime.now())
                 .build();

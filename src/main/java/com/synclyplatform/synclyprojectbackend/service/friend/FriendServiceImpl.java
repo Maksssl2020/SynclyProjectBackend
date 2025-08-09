@@ -9,9 +9,11 @@ import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.repository.FriendRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import com.synclyplatform.synclyprojectbackend.utils.UserMapper;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -38,6 +40,7 @@ public class FriendServiceImpl implements FriendService {
         }
 
         Friend friend = Friend.builder()
+                .createdAt(LocalDateTime.now())
                 .requester(foundRequester)
                 .receiver(foudReceiver)
                 .status(FriendStatus.PENDING)
@@ -92,6 +95,14 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
+    public void removeRequest(Long requesterId, Long receiverId) {
+        Friend foundRequest = friendRepository.findByRequesterUserIdAndReceiverUserId(requesterId, receiverId)
+                .orElseThrow(() -> new EntityNotFoundException("Friend request not found."));
+
+        friendRepository.delete(foundRequest);
+    }
+
+    @Override
     public List<FriendUserDTO> getFriendList(Long userId) {
         List<User> friendListNotDTO = getFriendListNotDTO(userId);
         Set<Long> friendListIds = friendListNotDTO.stream().map(User::getUserId).collect(Collectors.toSet());
@@ -121,6 +132,13 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
+    public List<FriendDTO> getSentRequests(Long userId) {
+        return friendRepository.findByRequesterUserIdAndStatus(userId, FriendStatus.PENDING).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<UserDTO> getSuggestedFriends(Long userId) {
         User foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -138,8 +156,32 @@ public class FriendServiceImpl implements FriendService {
 
         return friendsOfUserFriends.stream()
                 .filter(friend -> !alreadyConnectedIds.contains(friend.getUserId()))
-                .map(userMapper::toDTO)
+                .map(user -> {
+                    UserDTO mappedUser = userMapper.toDTO(user);
+                    List<Long> mutualFriendsList = alreadyConnectedIds.stream().filter(id -> !alreadyConnectedIds.contains(id)).toList();
+                    mappedUser.setMutualFriendsCount(mutualFriendsList.size());
+
+                    return mappedUser;
+                })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Long> getUserFiendIds(Long userId) {
+        return getFriendList(userId).stream()
+                .map(friendUserDTO -> friendUserDTO.getUser().getUserId())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getRequestStatus(Long requesterId, Long receiverId) {
+        Optional<Friend> friendRequest = friendRepository.findByRequesterUserIdAndReceiverUserId(requesterId, receiverId);
+
+        if (friendRequest.isPresent()) {
+            return friendRequest.get().getStatus().toString();
+        }
+
+        return FriendStatus.NONE.toString();
     }
 
     public List<User> getFriendListNotDTO(Long userId) {

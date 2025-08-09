@@ -3,6 +3,7 @@ package com.synclyplatform.synclyprojectbackend.service.tag;
 import com.synclyplatform.synclyprojectbackend.dto.tag.CommonTagRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.tag.MainTagRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.tag.TagDTO;
+import com.synclyplatform.synclyprojectbackend.dto.tag.TagUsageDTO;
 import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
 import com.synclyplatform.synclyprojectbackend.model.tag.TagType;
 import com.synclyplatform.synclyprojectbackend.model.tag_category.TagCategory;
@@ -59,6 +60,16 @@ public class TagServiceImpl implements TagService {
         return tagRepository.findAll().stream()
                 .map(tagMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TagUsageDTO> findPopularTags(int limit) {
+        return tagRepository.findPopularTags(limit);
+    }
+
+    @Override
+    public List<TagUsageDTO> findTrendingTags(int limit) {
+        return tagRepository.findTrendingTags(limit);
     }
 
     @Override

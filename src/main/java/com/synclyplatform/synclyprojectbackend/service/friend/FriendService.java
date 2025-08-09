@@ -16,7 +16,12 @@ public interface FriendService {
     void declineFriendRequest(Long requestId);
     void removeFriend(Long userId, Long friendId);
     void blockUser(Long userId, Long blockedUserId);
+    void removeRequest(Long requesterId, Long receiverId);
+
     List<FriendUserDTO> getFriendList(Long userId);
     List<FriendDTO> getPendingRequests(Long userId);
+    List<FriendDTO> getSentRequests(Long userId);
     List<UserDTO> getSuggestedFriends(Long userId);
+    List<Long> getUserFiendIds(Long userId);
+    String getRequestStatus(Long requesterId, Long receiverId);
 }

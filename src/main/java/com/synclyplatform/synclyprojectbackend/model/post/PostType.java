@@ -5,6 +5,5 @@ public enum PostType {
     QUOTE,
     PHOTO,
     VIDEO,
-    MUSIC,
     LINK
 }

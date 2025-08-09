@@ -3,6 +3,7 @@ package com.synclyplatform.synclyprojectbackend.controller;
 import com.synclyplatform.synclyprojectbackend.dto.tag.CommonTagRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.tag.MainTagRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.tag.TagDTO;
+import com.synclyplatform.synclyprojectbackend.dto.tag.TagUsageDTO;
 import com.synclyplatform.synclyprojectbackend.service.tag.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
@@ -23,6 +24,20 @@ public class TagController {
     @GetMapping
     public ResponseEntity<List<TagDTO>> getAllTags() {
         return ResponseEntity.ok(tagService.findAllTags());
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<List<TagUsageDTO>> getPopularTags(
+            @RequestParam("limit") int limit
+    ) {
+        return ResponseEntity.ok(tagService.findPopularTags(limit));
+    }
+
+    @GetMapping("/trending")
+    public ResponseEntity<List<TagUsageDTO>> getTrendingTags(
+            @RequestParam("limit") int limit
+    ) {
+        return ResponseEntity.ok(tagService.findTrendingTags(limit));
     }
 
     @GetMapping("/search")

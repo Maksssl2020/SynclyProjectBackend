@@ -74,23 +74,6 @@ public abstract class PostMapper {
         return dto;
     }
 
-    public AudioPostDTO toDto(AudioPost post) {
-        AudioPostDTO dto = new AudioPostDTO();
-
-        mapBaseFields(post, dto);
-        dto.setArtist(post.getArtist());
-        dto.setSongTitle(post.getSongTitle());
-
-        String audioUrl = post.getAudio().getUrl() != null
-                ? post.getAudio().getUrl()
-                : Base64.getEncoder().encodeToString(post.getAudio().getAudioData());
-
-        dto.setAudioUrl(audioUrl);
-        dto.setYourThoughts(post.getYourThoughts());
-
-        return dto;
-    }
-
     public VideoPostDTO toDto(VideoPost post) {
         VideoPostDTO dto = new VideoPostDTO();
 
@@ -160,9 +143,6 @@ public abstract class PostMapper {
     public abstract PhotoPost fromRequestDto(PhotoPostRequestDTO dto);
 
     @Mapping(target = "tags", ignore = true)
-    public abstract AudioPost fromRequestDto(AudioPostRequestDTO dto);
-
-    @Mapping(target = "tags", ignore = true)
     public abstract VideoPost fromRequestDto(VideoPostRequestDTO dto);
 
     @Mapping(target = "tags", ignore = true)
@@ -181,11 +161,6 @@ public abstract class PostMapper {
 
     @AfterMapping
     protected void mapTags(PhotoPostRequestDTO dto, @MappingTarget PhotoPost post) {
-        post.setTags(postMapperHelper.mapTagNamesToTags(dto.getTags()));
-    }
-
-    @AfterMapping
-    protected void mapTags(AudioPostRequestDTO dto, @MappingTarget AudioPost post) {
         post.setTags(postMapperHelper.mapTagNamesToTags(dto.getTags()));
     }
 
@@ -209,7 +184,6 @@ public abstract class PostMapper {
         return switch (post) {
             case TextPost textPost -> toDto(textPost);
             case PhotoPost photoPost -> toDto(photoPost);
-            case AudioPost audioPost -> toDto(audioPost);
             case VideoPost videoPost -> toDto(videoPost);
             case QuotePost quotePost -> toDto(quotePost);
             case LinkPost linkPost -> toDto(linkPost);

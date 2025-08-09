@@ -1,6 +1,7 @@
 package com.synclyplatform.synclyprojectbackend.controller;
 
 import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
+import com.synclyplatform.synclyprojectbackend.dto.user.UserPresenceDTO;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -41,5 +42,10 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserDTO> findUserById(@PathVariable Long userId) {
         return new ResponseEntity<>(userService.findUserById(userId), HttpStatus.OK);
+    }
+
+    @GetMapping("/presence/{userId}/status")
+    public ResponseEntity<UserPresenceDTO> findUserStatusById(@PathVariable Long userId) {
+        return new ResponseEntity<>(userService.getUserPresenceStatus(userId), HttpStatus.OK);
     }
 }

@@ -1,11 +1,12 @@
 package com.synclyplatform.synclyprojectbackend.service.user_post_like;
 
+import com.synclyplatform.synclyprojectbackend.model.user.User;
 import org.springframework.stereotype.Service;
 
 @Service
 public interface LikeService {
 
-    void likePost(long postId, long userId);
+    void likePost(User user, long userId);
     void likeUserProfile(long userId, long userProfileId);
-    void likePostComment(long userId, long postCommentId);
+    void likePostComment(User user, long postCommentId);
 }

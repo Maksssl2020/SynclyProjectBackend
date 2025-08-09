@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface FriendRepository extends JpaRepository<Friend, Long> {
 
     List<Friend> findByReceiverAndStatus(User receiver, FriendStatus status);
+    List<Friend> findByRequesterUserIdAndStatus(Long requesterId, FriendStatus status);
 
     @Query("""
         SELECT f FROM Friend f WHERE (f.requester = :user OR f.receiver = :user) AND f.status = 'ACCEPTED'
@@ -22,4 +23,5 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     List<Friend> findFriendsOfUser(@Param("user")  User user);
 
     Optional<Friend> findByReceiverAndRequester(User receiver, User requester);
+    Optional<Friend> findByRequesterUserIdAndReceiverUserId(Long requesterId, Long receiverId);
 }
