@@ -3,6 +3,7 @@ package com.synclyplatform.synclyprojectbackend.controller;
 import com.synclyplatform.synclyprojectbackend.dto.comment.PostCommentDTO;
 import com.synclyplatform.synclyprojectbackend.dto.comment.PostCommentReplyRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.comment.PostCommentRequestDTO;
+import com.synclyplatform.synclyprojectbackend.dto.comment.UpdateCommentRequestDTO;
 import com.synclyplatform.synclyprojectbackend.service.comment.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,5 +35,17 @@ public class CommentController {
     public ResponseEntity<PostCommentDTO> addCommentReply(@RequestBody @Valid PostCommentReplyRequestDTO postCommentReplyRequest) {
         PostCommentDTO postCommentReplyDTO = commentService.addReply(postCommentReplyRequest);
         return ResponseEntity.ok(postCommentReplyDTO);
+    }
+
+    @PatchMapping("/update")
+    public ResponseEntity<PostCommentDTO> updateComment(@RequestBody UpdateCommentRequestDTO updateCommentRequestDTO) {
+        commentService.updateComment(updateCommentRequestDTO);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("/delete-comment")
+    public ResponseEntity<HttpStatus> deleteComment(@RequestParam("commentId") Long commentId) {
+        commentService.deleteComment(commentId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

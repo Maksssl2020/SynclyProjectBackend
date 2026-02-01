@@ -8,8 +8,8 @@ import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
 import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserProfileRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
-import com.synclyplatform.synclyprojectbackend.utils.TagMapper;
-import com.synclyplatform.synclyprojectbackend.utils.UserProfileMapper;
+import com.synclyplatform.synclyprojectbackend.mapper.TagMapper;
+import com.synclyplatform.synclyprojectbackend.mapper.UserProfileMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +49,18 @@ public class FollowServiceImpl implements FollowService {
 
         return followedUsersCopy.stream()
                 .map(userProfileMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Long> getFollowedUsersIds(Long userId) {
+        User foundUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+        HashSet<UserProfile> followedUsersCopy = new HashSet<>(foundUser.getFollowedUsers());
+
+        return followedUsersCopy.stream()
+                .map(UserProfile::getUserProfileId)
                 .collect(Collectors.toList());
     }
 
@@ -98,5 +110,25 @@ public class FollowServiceImpl implements FollowService {
 
         foundUser.getFollowedUsers().remove(followedUserFound);
         userRepository.save(foundUser);
+    }
+
+    @Override
+    public UserProfileDTO followUserAndroid(Long userId, Long followedUserId) {
+        UserProfile followedUserFound = userProfileRepository.findByUser_UserId(followedUserId)
+                .orElseThrow(() -> new RuntimeException("Followed user not found!"));
+
+        followUser(userId, followedUserId);
+
+        return userProfileMapper.toDTO(followedUserFound);
+    }
+
+    @Override
+    public UserProfileDTO unfollowUserAndroid(Long userId, Long followedUserId) {
+        UserProfile followedUserFound = userProfileRepository.findByUser_UserId(followedUserId)
+                .orElseThrow(() -> new RuntimeException("Followed user not found!"));
+
+        unfollowUser(userId, followedUserId);
+
+        return userProfileMapper.toDTO(followedUserFound);
     }
 }

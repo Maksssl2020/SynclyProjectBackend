@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +18,9 @@ import java.util.Set;
 public interface PostRepository extends JpaRepository<Post,Long> {
 
     List<Post> findAllByAuthorUserId(Long userId);
+
+    List<Post> findAllByTagsContaining(Tag tag, Pageable pageable);
+
     Long countByAuthorUserId(Long userId);
 
     @Query("SELECT p FROM Post p WHERE p.author.userId != :userId ORDER BY RANDOM()")
@@ -60,4 +65,5 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     @Query("SELECT MAX(p.id) FROM Post p")
     Long findMaxPostId();
 
+    Long countAllByCreatedAtBetween(LocalDateTime createdAtAfter, LocalDateTime createdAtBefore);
 }

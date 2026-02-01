@@ -8,17 +8,17 @@ import com.synclyplatform.synclyprojectbackend.model.friend.FriendStatus;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.repository.FriendRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
-import com.synclyplatform.synclyprojectbackend.utils.UserMapper;
+import com.synclyplatform.synclyprojectbackend.mapper.UserMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -140,28 +140,48 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public List<UserDTO> getSuggestedFriends(Long userId) {
+        final int LIMIT = 10;
+
         User foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Set<User> friendsOfUserFriends = getFriendListNotDTO(userId).stream()
-                .flatMap(friend -> getFriendListNotDTO(friend.getUserId()).stream())
+        Set<Long> connectedIds = friendRepository.findConnectedUserIds(userId);
+        connectedIds.add(userId);
+
+        List<User> myFriends = getFriendListNotDTO(userId);
+
+        Set<User> candidates = myFriends.stream()
+                .flatMap(fr -> getFriendListNotDTO(fr.getUserId()).stream())
+                .filter(u -> !connectedIds.contains(u.getUserId()))
                 .collect(Collectors.toSet());
 
-        friendsOfUserFriends.remove(foundUser);
+        if (candidates.size() < LIMIT) {
+            Set<Long> excluded = new HashSet<>(connectedIds);
+            candidates.forEach(u -> excluded.add(u.getUserId()));
 
-        Set<Long> alreadyConnectedIds = friendRepository.findAll().stream()
-                .filter(friend -> (friend.getRequester().getUserId().equals(userId) || friend.getReceiver().getUserId().equals(userId)))
-                .map(friend -> friend.getRequester().getUserId().equals(userId) ? friend.getReceiver().getUserId() : friend.getRequester().getUserId())
-                .collect(Collectors.toSet());
+            int missing = LIMIT - candidates.size();
 
-        return friendsOfUserFriends.stream()
-                .filter(friend -> !alreadyConnectedIds.contains(friend.getUserId()))
-                .map(user -> {
-                    UserDTO mappedUser = userMapper.toDTO(user);
-                    List<Long> mutualFriendsList = alreadyConnectedIds.stream().filter(id -> !alreadyConnectedIds.contains(id)).toList();
-                    mappedUser.setMutualFriendsCount(mutualFriendsList.size());
+            if (excluded.isEmpty()) excluded.add(-1L);
 
-                    return mappedUser;
+            List<User> randoms = userRepository.findRandomUsersExclude(userId, excluded, missing);
+            candidates.addAll(randoms);
+        }
+
+        Set<Long> myFriendIds = myFriends.stream().map(User::getUserId).collect(Collectors.toSet());
+
+        return candidates.stream()
+                .limit(LIMIT)
+                .map(candidate -> {
+                    UserDTO dto = userMapper.toDTO(candidate);
+
+                    Set<Long> candidateFriendIds = getFriendListNotDTO(candidate.getUserId()).stream()
+                            .map(User::getUserId)
+                            .collect(Collectors.toSet());
+
+                    candidateFriendIds.retainAll(myFriendIds);
+                    dto.setMutualFriendsCount(candidateFriendIds.size());
+
+                    return dto;
                 })
                 .collect(Collectors.toList());
     }
@@ -199,7 +219,7 @@ public class FriendServiceImpl implements FriendService {
                 .id(friend.getId())
                 .receiver(userMapper.toDTO(friend.getReceiver()))
                 .requester(userMapper.toDTO(friend.getRequester()))
-                .status(friend.getStatus().toString())
+                .status(friend.getStatus())
                 .createdAt(friend.getCreatedAt().toString())
                 .build();
     }

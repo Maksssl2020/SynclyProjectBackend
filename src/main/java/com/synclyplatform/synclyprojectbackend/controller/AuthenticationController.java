@@ -1,10 +1,9 @@
 package com.synclyplatform.synclyprojectbackend.controller;
 
-import com.synclyplatform.synclyprojectbackend.dto.authentication.AuthenticationRequestDTO;
-import com.synclyplatform.synclyprojectbackend.dto.authentication.AuthenticationResponseDTO;
-import com.synclyplatform.synclyprojectbackend.dto.authentication.ChangePasswordRequestDTO;
-import com.synclyplatform.synclyprojectbackend.dto.authentication.RegisterRequestDTO;
+import com.synclyplatform.synclyprojectbackend.dto.authentication.*;
+import com.synclyplatform.synclyprojectbackend.dto.two_factor_code.TwoFactorVerificationRequestDTO;
 import com.synclyplatform.synclyprojectbackend.service.authentication.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,7 +28,17 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponseDTO> loginUser(@Valid @RequestBody AuthenticationRequestDTO authenticationRequest) {
-        return new ResponseEntity<>(authenticationService.authenticate(authenticationRequest),  HttpStatus.OK);
+        return new ResponseEntity<>(authenticationService.authenticate(authenticationRequest), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/verify-turnstile")
+    public ResponseEntity<TurnstileResponseDTO> verifyTurnstile(@RequestParam("token")  String token)  {
+        return new ResponseEntity<>(authenticationService.verifyTurnstile(token), HttpStatus.OK);
+    }
+
+    @PostMapping("/android-app/login")
+    public ResponseEntity<AndroidAppAuthenticationResponseDTO> androidLoginUser(@Valid @RequestBody AuthenticationRequestDTO authenticationRequest) throws Exception {
+        return new ResponseEntity<>(authenticationService.authenticateAndroidUser(authenticationRequest), HttpStatus.CREATED);
     }
 
     @PostMapping("/exists/username")
@@ -40,6 +49,14 @@ public class AuthenticationController {
     @PostMapping("/exists/email")
     public ResponseEntity<Boolean> existsEmail(@RequestParam("email") String email) {
         return new ResponseEntity<>(authenticationService.emailExists(email), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/verify-2fa")
+    public ResponseEntity<AuthenticationResponseDTO> verify2fa(
+            @RequestBody @Valid TwoFactorVerificationRequestDTO twoFactorVerificationRequest,
+            HttpServletRequest httpServletRequest
+    ) throws Exception {
+        return new ResponseEntity<>(authenticationService.validate2FARequest(twoFactorVerificationRequest, httpServletRequest), HttpStatus.OK);
     }
 
     @PutMapping("/change-password/{userId}")

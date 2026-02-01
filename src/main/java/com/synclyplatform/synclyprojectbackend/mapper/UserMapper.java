@@ -1,10 +1,8 @@
-package com.synclyplatform.synclyprojectbackend.utils;
+package com.synclyplatform.synclyprojectbackend.mapper;
 
-import com.synclyplatform.synclyprojectbackend.dto.tag.TagDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
-import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
-import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
+import com.synclyplatform.synclyprojectbackend.repository.PostRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -12,10 +10,12 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UserMapper {
-    private final UserRepository tagRepository;
+    private final PostRepository postRepository;
     private final UserProfileMapper userProfileMapper;
 
     public UserDTO toDTO(User user) {
+        Long postCount = postRepository.countByAuthorUserId(user.getUserId());
+
         return UserDTO.builder()
                 .userId(user.getUserId())
                 .username(user.getUsername())
@@ -27,6 +27,7 @@ public class UserMapper {
                 .lastActive(user.getLastActive() == null ? "" :  user.getLastActive().toString())
                 .status(user.getStatus())
                 .userProfile(userProfileMapper.toDTO(user.getUserProfile()))
+                .postCount(postCount)
                 .build();
     }
 }

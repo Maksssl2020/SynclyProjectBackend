@@ -15,4 +15,6 @@ public interface UserService {
     List<User> findConnectedUsers();
     List<UserDTO> searchUsers(String query);
     UserPresenceDTO getUserPresenceStatus(Long userId);
+
+    List<UserDTO> getAllUsers();
 }

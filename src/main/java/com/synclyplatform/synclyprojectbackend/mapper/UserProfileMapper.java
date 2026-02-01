@@ -1,4 +1,4 @@
-package com.synclyplatform.synclyprojectbackend.utils;
+package com.synclyplatform.synclyprojectbackend.mapper;
 
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileDTO;
 import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
@@ -19,6 +19,7 @@ public class UserProfileMapper {
 
         return UserProfileDTO.builder()
                 .userProfileId(userProfile.getUserProfileId())
+                .profileOwnerId(userProfile.getUser().getUserId())
                 .username(userProfile.getUser().getUsername())
                 .email(userProfile.getUser().getEmail())
                 .bio(userProfile.getBio())

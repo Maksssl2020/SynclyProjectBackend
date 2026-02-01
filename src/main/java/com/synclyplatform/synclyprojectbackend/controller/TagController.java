@@ -21,8 +21,24 @@ public class TagController {
 
     private final TagService tagService;
 
+
     @GetMapping
     public ResponseEntity<List<TagDTO>> getAllTags() {
+        return ResponseEntity.ok(tagService.findAllTags());
+    }
+
+    @GetMapping("/tag/by-name")
+    public ResponseEntity<TagDTO> getTagByName(@Param("tagName") String tagName) {
+        return new ResponseEntity<>(tagService.getTagByName(tagName), HttpStatus.OK);
+    }
+
+    @GetMapping("/related/by-category")
+    public ResponseEntity<List<TagDTO>> getRelatedTagsByCategory(@Param("category") String category) {
+        return new ResponseEntity<>(tagService.findRelatedTagsByCategory(category), HttpStatus.OK);
+    }
+
+    @GetMapping("/android-app")
+    public ResponseEntity<List<TagDTO>> getAllTagsAndroidApp() {
         return ResponseEntity.ok(tagService.findAllTags());
     }
 

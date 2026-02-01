@@ -26,6 +26,11 @@ public class FriendController {
         return new ResponseEntity<>(friendService.getFriendList(user.getUserId()), HttpStatus.OK);
     }
 
+    @GetMapping("/android-app/all/{userId}")
+    public ResponseEntity<List<FriendUserDTO>> getFriendListForAndroidApp(@PathVariable Long userId) {
+        return new ResponseEntity<>(friendService.getFriendList(userId), HttpStatus.OK);
+    }
+
     @GetMapping("/ids")
     public ResponseEntity<List<Long>> getFriendIdsList(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(friendService.getUserFiendIds(user.getUserId()), HttpStatus.OK);
@@ -36,9 +41,19 @@ public class FriendController {
         return new ResponseEntity<>(friendService.getSentRequests(user.getUserId()), HttpStatus.OK);
     }
 
+    @GetMapping("/android-app/sent")
+    public ResponseEntity<List<FriendDTO>> getSentRequestsAndroid(@RequestParam("userId") Long userId) {
+        return new ResponseEntity<>(friendService.getSentRequests(userId), HttpStatus.OK);
+    }
+
     @GetMapping("/pending")
     public ResponseEntity<List<FriendDTO>> getPendingRequests(@AuthenticationPrincipal User user) {
         return new ResponseEntity<>(friendService.getPendingRequests(user.getUserId()), HttpStatus.OK);
+    }
+
+    @GetMapping("/android-app/pending")
+    public ResponseEntity<List<FriendDTO>> getPendingRequestsAndroid(@RequestParam("userId") Long userId) {
+        return new ResponseEntity<>(friendService.getPendingRequests(userId), HttpStatus.OK);
     }
 
     @GetMapping("/suggested")
@@ -97,6 +112,12 @@ public class FriendController {
     @DeleteMapping("/remove/request/{receiverId}")
     public ResponseEntity<HttpStatus> removeFriendRequest(@AuthenticationPrincipal User user, @PathVariable Long receiverId) {
         friendService.removeRequest(user.getUserId(), receiverId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("/android-app/remove/request/{receiverId}")
+    public ResponseEntity<HttpStatus> removeFriendRequestAndroid(@RequestParam("userId") Long userId, @PathVariable Long receiverId) {
+        friendService.removeRequest(userId, receiverId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

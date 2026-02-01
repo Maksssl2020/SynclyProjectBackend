@@ -7,15 +7,13 @@ import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.service.conversation_message.ConversationMessageService;
 import com.synclyplatform.synclyprojectbackend.utils.ConversationNotification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
@@ -33,23 +31,24 @@ public class ConversationMessageController {
             @Payload ConversationMessageRequestDTO conversationMessageRequest
     ) throws Exception {
         System.out.println("Received message: " + conversationMessageRequest.getMessage()); // Add this
+        System.out.println("Received recipient username: " + conversationMessageRequest.getRecipientUsername()); // Add this
 
         ConversationMessage savedConversationMessage = conversationMessageService.save(conversationMessageRequest);
 
         System.out.println("Saved conversation message: " + savedConversationMessage.getContent());
 
         messagingTemplate.convertAndSendToUser(
-                String.valueOf(savedConversationMessage.getRecipientUserId()),
+                savedConversationMessage.getRecipientUsername(),
                 "/queue/messages",
-                ConversationNotification.builder()
-                        .conversationId(savedConversationMessage.getConversationId())
-                        .recipientUserId(savedConversationMessage.getRecipientUserId())
-                        .senderUserId(savedConversationMessage.getSenderUserId())
-                        .senderUsername(savedConversationMessage.getSenderUsername())
-                        .recipientUsername(savedConversationMessage.getRecipientUsername())
-                        .messageContent(savedConversationMessage.getContent())
-                        .build()
+                savedConversationMessage
         );
+
+        messagingTemplate.convertAndSendToUser(
+                savedConversationMessage.getSenderUsername(),
+                "/queue/messages",
+                savedConversationMessage
+        );
+
         System.out.println("Saved conversation message: " + savedConversationMessage.getContent());
     }
 
@@ -62,11 +61,13 @@ public class ConversationMessageController {
     }
 
     @GetMapping("/by-user-ids/{recipientId}")
-    public ResponseEntity<List<ConversationMessage>> findConversationMessages(
+    public ResponseEntity<Page<ConversationMessage>> findConversationMessages(
             @AuthenticationPrincipal User user,
-            @PathVariable Long recipientId
+            @PathVariable Long recipientId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
     ) throws Exception {
-        List<ConversationMessage> conversationMessages = conversationMessageService.findConversationMessages(user, recipientId);
+        Page<ConversationMessage> conversationMessages = conversationMessageService.findConversationMessages(user, recipientId, page, size);
         conversationMessages.forEach(mess -> System.out.println(mess.getContent()));
         return ResponseEntity.ok(conversationMessages);
     }

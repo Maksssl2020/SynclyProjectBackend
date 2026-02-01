@@ -3,21 +3,22 @@ package com.synclyplatform.synclyprojectbackend.service.post;
 import com.synclyplatform.synclyprojectbackend.dto.post.*;
 import com.synclyplatform.synclyprojectbackend.model.post.*;
 import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
+import com.synclyplatform.synclyprojectbackend.model.tag.TagType;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
 import com.synclyplatform.synclyprojectbackend.repository.PostRepository;
+import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import com.synclyplatform.synclyprojectbackend.service.media.MediaService;
-import com.synclyplatform.synclyprojectbackend.utils.PostMapper;
+import com.synclyplatform.synclyprojectbackend.mapper.PostMapper;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ public class PostServiceImpl implements PostService {
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final TagRepository tagRepository;
     private final PostMapper postMapper;
     private final MediaService mediaService;
 
@@ -64,7 +66,6 @@ public class PostServiceImpl implements PostService {
                 VideoPost mappedVideoPost = postMapper.fromRequestDto(videoPostRequestDTO);
 
                 mappedVideoPost.setAuthor(foundUser);
-                mediaService.savePostVideos(mappedVideoPost, videoPostRequestDTO.getVideos());
                 mappedVideoPost.setPostType(PostType.VIDEO);
                 postRepository.save(mappedVideoPost);
             }
@@ -128,8 +129,158 @@ public class PostServiceImpl implements PostService {
 
         return postRepository.findPostsByAuthorsOrTags(followedUsersIds, followedTagsIds, PageRequest.of(offset, limit))
                 .stream()
+                .filter(post -> !Objects.equals(post.getAuthor().getUserId(), userId))
                 .map(postMapper::toDto)
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<PostDTO> getPostsByTag(String tag, int offset, int limit) {
+        Tag foundTag = tagRepository.findByName(tag)
+                .orElseThrow(() -> new EntityNotFoundException("Tag not found"));
+
+        return postRepository.findAllByTagsContaining(foundTag, PageRequest.of(offset, limit)).stream()
+                .map(postMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deletePost(Long postId) {
+        Post foundPost = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        postRepository.delete(foundPost);
+    }
+
+    @Override
+    public void update(UpdatePostRequestDTO updatePostRequestDTO) {
+        Post post = postRepository.findById(updatePostRequestDTO.getPostId())
+                .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+        PostRequestDTO updatedData = updatePostRequestDTO.getUpdatedData();
+        Post postToSave = null;
+
+        switch (updatedData) {
+            case TextPostRequestDTO textPostRequestDTO-> {
+                if (post instanceof TextPost textPost) {
+                    TextPost updatedTextPost = updateTextPost(textPost, textPostRequestDTO);
+                    postToSave = compareAndUpdateTags(updatedTextPost, textPostRequestDTO.getTags());
+                }
+            }
+            case QuotePostRequestDTO quotePostRequestDTO -> {
+                if (post instanceof QuotePost quotePost) {
+                    QuotePost updatedQuotePost = updateQuotePost(quotePost, quotePostRequestDTO);
+                    postToSave = compareAndUpdateTags(updatedQuotePost, quotePostRequestDTO.getTags());
+                }
+            }
+            case PhotoPostRequestDTO photoPostRequestDTO -> {
+                if (post instanceof PhotoPost photoPost) {
+                    PhotoPost updatedPhotoPost = updatePhotoPost(photoPost, photoPostRequestDTO);
+                    postToSave = compareAndUpdateTags(updatedPhotoPost, photoPostRequestDTO.getTags());
+                }
+            }
+            case VideoPostRequestDTO videoPostRequestDTO -> {
+                if (post instanceof VideoPost videoPost) {
+                    VideoPost updatedVideoPost = updateVideoPost(videoPost, videoPostRequestDTO);
+                    postToSave = compareAndUpdateTags(updatedVideoPost, videoPostRequestDTO.getTags());
+                }
+            }
+            case LinkPostRequestDTO linkPostRequestDTO -> {
+                if (post instanceof LinkPost linkPost) {
+                    LinkPost updatedLinkPost = updateLinkPost(linkPost, linkPostRequestDTO);
+                    postToSave =  compareAndUpdateTags(updatedLinkPost, linkPostRequestDTO.getTags());
+                }
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + updatedData);
+        }
+
+
+        if (postToSave != null) {
+            postRepository.save(postToSave);
+        }
+    }
+
+    private Post compareAndUpdateTags(Post post, Set<String> tags) {
+        Set<String> mappedTags = post.getTags().stream().map(Tag::getName).collect(Collectors.toSet());
+
+        if (tags != null && tags.equals(mappedTags)) {
+            List<Tag> updatedTags = tags.stream()
+                    .map(this::findOrCreateTag)
+                    .toList();
+
+            post.getTags().clear();
+            post.getTags().addAll(updatedTags);
+        }
+
+        return post;
+    }
+
+    private TextPost updateTextPost(TextPost textPost, TextPostRequestDTO textPostRequestDTO) {
+        if (textPostRequestDTO.getTitle() != null) {
+            textPost.setTitle(textPostRequestDTO.getTitle());
+        }
+        if (textPostRequestDTO.getContent() != null) {
+            textPost.setContent(textPostRequestDTO.getContent());
+        }
+
+        return textPost;
+    }
+
+    private QuotePost updateQuotePost(QuotePost quotePost, QuotePostRequestDTO quotePostRequestDTO) {
+        if (quotePostRequestDTO.getQuote() != null) {
+            quotePost.setQuote(quotePostRequestDTO.getQuote());
+        }
+        if (quotePostRequestDTO.getSource() != null) {
+            quotePost.setSource(quotePostRequestDTO.getSource());
+        }
+
+        return quotePost;
+    }
+
+    private PhotoPost updatePhotoPost(PhotoPost photoPost, PhotoPostRequestDTO photoPostRequestDTO) {
+        if (photoPostRequestDTO.getCaption() != null) {
+            photoPost.setCaption(photoPostRequestDTO.getCaption());
+        }
+        if (photoPostRequestDTO.getPhotos() != null) {
+            mediaService.savePostPhotos(photoPost, photoPostRequestDTO.getPhotos());
+        }
+
+        return photoPost;
+    }
+
+    private VideoPost updateVideoPost(VideoPost videoPost, VideoPostRequestDTO videoPostRequestDTO) {
+        if (videoPostRequestDTO.getDescription() != null) {
+            videoPost.setDescription(videoPostRequestDTO.getDescription());
+        }
+        if (videoPostRequestDTO.getVideoUrls() != null) {
+            videoPost.getVideoUrls().clear();
+            videoPost.getVideoUrls().addAll(videoPostRequestDTO.getVideoUrls());
+        }
+
+        return videoPost;
+    }
+
+    private LinkPost updateLinkPost(LinkPost linkPost, LinkPostRequestDTO linkPostRequestDTO) {
+        if (linkPostRequestDTO.getTitle() != null) {
+            linkPost.setTitle(linkPostRequestDTO.getTitle());
+        }
+        if (linkPostRequestDTO.getDescription() != null) {
+            linkPost.setDescription(linkPostRequestDTO.getDescription());
+        }
+        if (linkPostRequestDTO.getLinks() != null) {
+            linkPost.getLinks().clear();
+            linkPost.getLinks().addAll(linkPostRequestDTO.getLinks());
+        }
+
+        return linkPost;
+    }
+
+    private Tag findOrCreateTag(String name) {
+        return tagRepository.findByName(name)
+                .orElseGet(() -> {
+                    Tag newTag = new Tag();
+                    newTag.setType(TagType.COMMON);
+                    newTag.setName(name);
+                    return newTag;
+                });
+    }
 }

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kod Weryfikacyjny - Syncly</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+                padding: 15px !important;
+            }
+            .content {
+                padding: 20px !important;
+            }
+            .header-table {
+                width: 100% !important;
+            }
+            .logo-cell {
+                text-align: center !important;
+                padding-bottom: 20px !important;
+                display: block !important;
+                width: 100% !important;
+            }
+            .text-cell {
+                text-align: center !important;
+                display: block !important;
+                width: 100% !important;
+            }
+            .logo {
+                width: 70px !important;
+                height: 70px !important;
+            }
+            .code {
+                font-size: 2.5rem !important;
+                letter-spacing: 0.15em !important;
+            }
+            .username {
+                font-size: 1.2rem !important;
+            }
+            .features-table td {
+                display: block !important;
+                width: 100% !important;
+                text-align: center !important;
+                padding: 10px 0 !important;
+            }
+        }
+
+        @media only screen and (max-width: 480px) {
+            .code {
+                font-size: 2rem !important;
+            }
+            .content {
+                padding: 15px !important;
+            }
+        }
+    </style>
+</head>
+<body style="font-family: 'Lato', Arial, sans-serif; background-color: #0A0A0C; color: #e6e6e6; margin: 0; padding: 20px; line-height: 1.6;">
+
+<table class="container" style="max-width: 600px; margin: 0 auto; background: #171719; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); border: 2px solid #14b8a6; width: 100%;">
+    <tr>
+        <td class="content" style="padding: 35px;">
+
+            <table class="header-table" style="width: 100%; margin-bottom: 25px;">
+                <tr>
+                    <td class="logo-cell" style="width: 100px; vertical-align: top; padding-right: 25px;">
+                        <div style="width: 80px; height: 80px; background: #14b8a6; border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                            <table style="width: 80px; height: 80px;">
+                                <tr>
+                                    <td style="text-align: center; vertical-align: middle;">
+                                        <span style="color: #0A0A0C; font-size: 2.2rem; font-weight: bold;">S</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+
+                    <td class="text-cell" style="vertical-align: top;">
+                        <h2 class="username" style="font-weight: bold; margin: 0 0 12px 0; font-size: 1.5rem; color: #E6E6E6;">
+                            Hello, <span style="color: #14b8a6;" th:text="${username}">User</span>!
+                        </h2>
+                        <p style="margin: 0; font-size: 1rem; color: #9f9da2;">
+                            Your <strong style="color: #14b8a6;">Syncly</strong> verification code is ready.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            <div style="background: #0A0A0C; padding: 30px 20px; border-radius: 12px; text-align: center; margin: 25px 0; border: 2px solid #14b8a6; position: relative;">
+                <p style="margin: 0 0 15px 0; font-size: 0.9rem; color: #9f9da2; text-transform: uppercase; letter-spacing: 0.1em;">
+                    Your verification code
+                </p>
+                <h1 class="code" style="color: #14b8a6; font-size: 3.5rem; margin: 0; font-weight: bold; letter-spacing: 0.2em; text-shadow: 0 0 20px rgba(20, 184, 166, 0.3);" th:text="${code}">847293</h1>
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #2C2C2E;">
+                    <p style="margin: 0; font-size: 0.9rem; color: #B0B0B0;">
+                        <span style="color: #22d3ee;">&#9200;</span> Code expires in <strong style="color: #14b8a6;">10 minutes</strong>
+                    </p>
+                </div>
+            </div>
+
+            <table style="width: 100%; margin: 25px 0;">
+                <tr>
+                    <td style="padding: 15px; background: #222222; border-radius: 8px; border-left: 4px solid #14b8a6;">
+                        <p style="margin: 0; font-size: 0.95rem; color: #E6E6E6;">
+                            <strong style="color: #14b8a6;">How to use the code?</strong><br>
+                            <span style="color: #9f9da2;">Enter the above code into the verification window in the Syncly app. Do not share this code with anyone.</span>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+            <hr style="border: none; border-top: 1px solid #2C2C2E; margin: 30px 0;">
+
+            <table style="width: 100%;">
+                <tr>
+                    <td style="text-align: center; padding: 15px; background: #0A0A0C; border-radius: 8px; border: 1px solid #2C2C2E;">
+                        <p style="color: #9f9da2; font-size: 0.85rem; margin: 0; line-height: 1.5;">
+                            <span style="color: #14b8a6;">&#128274;</span> <strong style="color: #E6E6E6;">Security message</strong><br>
+                            If you haven't tried to log in, please ignore this message.<br>
+                            Your account remains secure.
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+
+            <table style="width: 100%; margin-top: 20px;">
+                <tr>
+                    <td style="text-align: center; padding-top: 20px; border-top: 1px solid #2C2C2E;">
+                        <p style="margin: 0 0 10px 0; color: #767676; font-size: 0.75rem;">
+                            &copy; <span th:text="${#dates.createNow().getYear()}">2026</span>  Syncly. All rights reserved.
+                        </p>
+                        <p style="margin: 0; color: #4A4A4D; font-size: 0.7rem;">
+                            <a href="#" style="color: #767676; text-decoration: none; margin: 0 10px;">Privacy Policy</a>
+                            <span style="color: #2C2C2E;">|</span>
+                            <a href="#" style="color: #767676; text-decoration: none; margin: 0 10px;">About Us</a>
+                            <span style="color: #2C2C2E;">|</span>
+                            <a href="#" style="color: #767676; text-decoration: none; margin: 0 10px;">Terms</a>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+<table style="max-width: 600px; margin: 20px auto 0 auto;">
+    <tr>
+        <td style="text-align: center;">
+            <p style="color: #767676; font-size: 0.7rem; margin: 0;">
+                This message was generated automatically. Please do not reply.
+            </p>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

@@ -3,21 +3,20 @@ package com.synclyplatform.synclyprojectbackend.service.comment;
 import com.synclyplatform.synclyprojectbackend.dto.comment.PostCommentDTO;
 import com.synclyplatform.synclyprojectbackend.dto.comment.PostCommentReplyRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.comment.PostCommentRequestDTO;
+import com.synclyplatform.synclyprojectbackend.dto.comment.UpdateCommentRequestDTO;
 import com.synclyplatform.synclyprojectbackend.model.comment.PostComment;
 import com.synclyplatform.synclyprojectbackend.model.post.Post;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
-import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
 import com.synclyplatform.synclyprojectbackend.repository.PostCommentRepository;
 import com.synclyplatform.synclyprojectbackend.repository.PostRepository;
-import com.synclyplatform.synclyprojectbackend.repository.UserProfileRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
+import com.synclyplatform.synclyprojectbackend.mapper.PostCommentMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +25,7 @@ public class CommentServiceImpl implements CommentService {
     private final PostCommentRepository postCommentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final UserProfileRepository userProfileRepository;
+    private final PostCommentMapper postCommentMapper;
 
     @Override
     public PostCommentDTO addComment(PostCommentRequestDTO postCommentRequest) {
@@ -44,7 +43,7 @@ public class CommentServiceImpl implements CommentService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        return createPostCommentDTO(postCommentRepository.save(comment));
+        return postCommentMapper.toDTO(postCommentRepository.save(comment));
     }
 
     @Override
@@ -64,7 +63,7 @@ public class CommentServiceImpl implements CommentService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        return createPostCommentDTO(postCommentRepository.save(reply));
+        return postCommentMapper.toDTO(postCommentRepository.save(reply));
     }
 
     @Override
@@ -73,7 +72,7 @@ public class CommentServiceImpl implements CommentService {
                 .findByPostIdAndParentIsNullOrderByCreatedAtAsc(postId);
 
         return topLevelComments.stream()
-                .map(this::createPostCommentDTO)
+                .map(postCommentMapper::toDTO)
                 .toList();
     }
 
@@ -82,27 +81,18 @@ public class CommentServiceImpl implements CommentService {
         if (!postCommentRepository.existsById(commentId)) {
             throw new EntityNotFoundException("Comment not found");
         }
+
         postCommentRepository.deleteById(commentId);
     }
 
-    public PostCommentDTO createPostCommentDTO(PostComment postComment) {
-        Optional<UserProfile> userProfile = userProfileRepository.findByUser_UserId(postComment.getAuthor().getUserId());
+    @Override
+    public void updateComment(UpdateCommentRequestDTO updateCommentRequestDTO) {
+        PostComment comment = postCommentRepository.findById(updateCommentRequestDTO.getCommentId())
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
 
-        return PostCommentDTO.builder()
-                .id(postComment.getId())
-                .content(postComment.getContent())
-                .createdAt(postComment.getCreatedAt().toString())
-                .updatedAt(postComment.getUpdatedAt().toString())
-                .authorId(postComment.getAuthor().getUserId())
-                .authorUsername(postComment.getAuthor().getUsername())
-                .authorName(userProfile.map(UserProfile::getDisplayName).orElse(postComment.getAuthor().getFirstName() + " "  + postComment.getAuthor().getLastName()))
-                .authorImage(userProfile.map(UserProfile::getProfileImage).orElse(null))
-                .likesBy(postComment.getLikes() != null ? postComment.getLikes().stream().map(userCommentLike ->  userCommentLike.getUser().getUserId()).toList() : List.of())
-                .postId(postComment.getPost().getId())
-                .parentId(postComment.getParent() != null ? postComment.getParent().getId() : null)
-                .replies(postComment.getReplies() != null ? postComment.getReplies().stream()
-                        .map(this::createPostCommentDTO)
-                        .toList() : List.of())
-                .build();
+        if (!comment.getContent().equals(updateCommentRequestDTO.getContent())) {
+            comment.setContent(updateCommentRequestDTO.getContent());
+            postCommentRepository.save(comment);
+        }
     }
 }

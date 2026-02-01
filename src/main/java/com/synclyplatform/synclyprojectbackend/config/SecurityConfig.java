@@ -35,7 +35,26 @@ public class SecurityConfig {
                                 "/ws/**",
                                 "/api/v1/generate-data/**",
                                 "/api/v1/tags/popular",
-                                "/api/v1/tags/trending"
+                                "/api/v1/tags/trending",
+                                "/api/v1/friends/android-app/**",
+                                "/api/v1/friends/accept/request/**",
+                                "/api/v1/friends/decline/request/**",
+                                "/api/v1/users-profiles/android-app/**",
+                                "/api/v1/users/search/**",
+                                "/api/v1/posts/search/**",
+                                "/api/v1/tags/search/**",
+                                "/api/v1/follows/**",
+                                "/api/v1/posts/android-app/**",
+                                "/api/v1/likes/android-app/**",
+                                "/api/v1/likes/user/liked-profiles/**",
+                                "/api/v1/shared-posts/android-app/**",
+                                "/api/v1/tags/android-app/**",
+                                "/api/v1/comments/**",
+                                "/api/v1/post-collections/all-by-user/**",
+                                "/api/v1/post-collections/android-app/**",
+                                "/api/v1/post-collections/save-post/**",
+                                "/api/v1/post-collections/unsave-post/by-post-collection/**",
+                                "/api/v1/media/**"
                         ).permitAll().anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

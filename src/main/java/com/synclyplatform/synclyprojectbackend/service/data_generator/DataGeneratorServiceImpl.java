@@ -113,7 +113,7 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
                 TextPostRequestDTO textPostRequestDTO = new TextPostRequestDTO();
                 textPostRequestDTO.setTitle(faker.book().title());
                 textPostRequestDTO.setContent(faker.lorem().paragraph(3));
-                textPostRequestDTO.setTags(tags.stream().toList());
+                textPostRequestDTO.setTags(tags);
 
                 postService.save(randomUserId, textPostRequestDTO);
             }
@@ -121,7 +121,7 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
                 QuotePostRequestDTO quotePostRequestDTO = new QuotePostRequestDTO();
                 quotePostRequestDTO.setQuote(faker.hitchhikersGuideToTheGalaxy().quote());
                 quotePostRequestDTO.setSource(faker.book().title());
-                quotePostRequestDTO.setTags(tags.stream().toList());
+                quotePostRequestDTO.setTags(tags);
 
                 postService.save(randomUserId, quotePostRequestDTO);
             }
@@ -159,7 +159,7 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
                 }
 
                 linkPostRequestDTO.setLinks(links);
-                linkPostRequestDTO.setTags(tags.stream().toList());
+                linkPostRequestDTO.setTags(tags);
 
                 postService.save(randomUserId, linkPostRequestDTO);
             }
@@ -177,14 +177,14 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
                 }
 
                 photoPostRequestDTO.setPhotos(photos);
-                photoPostRequestDTO.setTags(tags.stream().toList());
+                photoPostRequestDTO.setTags(tags);
 
                 postService.save(randomUserId, photoPostRequestDTO);
             }
             case 4 -> {
                 VideoPostRequestDTO videoPostRequestDTO = new VideoPostRequestDTO();
                 videoPostRequestDTO.setDescription(faker.lorem().sentence());
-                List<MediaRequestDTO> videos = new ArrayList<>();
+                List<String> videoUrls = new ArrayList<>();
                 List<String> sampleVideoUrls = List.of(
                         "https://www.w3schools.com/html/mov_bbb.mp4",
                         "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
@@ -206,18 +206,14 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
 
                 );
 
-
                 for (int i = 0; i < random.nextInt(3) + 1; i++) {
-                    MediaRequestDTO mediaRequestDTO = new MediaRequestDTO();
                     int videoUrlIndex = random.nextInt(sampleVideoUrls.size());
-
-                    mediaRequestDTO.setUrl(sampleVideoUrls.get(videoUrlIndex));
-                    mediaRequestDTO.setMediaType(MediaType.VIDEO);
-                    videos.add(mediaRequestDTO);
+                    String url = sampleVideoUrls.get(videoUrlIndex);
+                    videoUrls.add(url);
                 }
 
-                videoPostRequestDTO.setVideos(videos);
-                videoPostRequestDTO.setTags(tags.stream().toList());
+                videoPostRequestDTO.setVideoUrls(videoUrls);
+                videoPostRequestDTO.setTags(tags);
 
                 postService.save(randomUserId, videoPostRequestDTO);
             }

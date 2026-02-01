@@ -1,17 +1,18 @@
 package com.synclyplatform.synclyprojectbackend.service.media;
 
+import com.synclyplatform.synclyprojectbackend.dto.media.MediaDTO;
 import com.synclyplatform.synclyprojectbackend.dto.media.MediaRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.media.MediaType;
 import com.synclyplatform.synclyprojectbackend.model.audio.Audio;
 import com.synclyplatform.synclyprojectbackend.model.image.Image;
 import com.synclyplatform.synclyprojectbackend.model.post.PhotoPost;
+import com.synclyplatform.synclyprojectbackend.model.post.Post;
+import com.synclyplatform.synclyprojectbackend.model.post.PostType;
 import com.synclyplatform.synclyprojectbackend.model.post.VideoPost;
 import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
 import com.synclyplatform.synclyprojectbackend.model.video.Video;
-import com.synclyplatform.synclyprojectbackend.repository.AudioRepository;
-import com.synclyplatform.synclyprojectbackend.repository.ImageRepository;
-import com.synclyplatform.synclyprojectbackend.repository.UserProfileRepository;
-import com.synclyplatform.synclyprojectbackend.repository.VideoRepository;
+import com.synclyplatform.synclyprojectbackend.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,8 +31,8 @@ public class MediaServiceImpl implements MediaService {
 
     private final ImageRepository imageRepository;
     private final VideoRepository videoRepository;
-    private final AudioRepository audioRepository;
     private final UserProfileRepository userProfileRepository;
+    private final PostRepository postRepository;
 
     @Override
     @Transactional
@@ -79,24 +80,6 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public void savePostVideos(VideoPost videoPost, List<MediaRequestDTO> mediaRequestDTOList) {
-        List<Video> videoEntities = new ArrayList<>();
-
-        mediaRequestDTOList.forEach(mediaRequestDTO -> {
-            if (mediaRequestDTO.getMediaType().equals(MediaType.VIDEO)) {
-                Video videoEntity = createVideo(mediaRequestDTO);
-
-                videoRepository.save(videoEntity);
-                videoEntities.add(videoEntity);
-            }
-        });
-
-        if (!videoEntities.isEmpty()) {
-            videoPost.setVideos(videoEntities);
-        }
-    }
-
-    @Override
     public MultipartFile base64ToMultipartFile(String base64, String fileName) {
         byte[] decoded = Base64.getDecoder().decode(base64);
 
@@ -110,6 +93,35 @@ public class MediaServiceImpl implements MediaService {
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
+    }
+
+    @Override
+    public List<MediaDTO> getPostPhotos(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("Post not found."));
+
+        if (!post.getPostType().equals(PostType.PHOTO)) {
+            throw new IllegalStateException("Post type is not PHOTO.");
+        }
+
+        if (post instanceof PhotoPost photoPost) {
+            return photoPost.getImages().stream().map(imageEntity -> {
+                if (imageEntity.getUrl() != null) {
+                    return MediaDTO.builder()
+                            .entityId(imageEntity.getImageId())
+                            .url(imageEntity.getUrl())
+                            .build();
+                }
+
+                return MediaDTO.builder()
+                        .entityId(imageEntity.getImageId())
+                        .mediaFile(imageEntity.getImageData())
+                        .build();
+            })
+                    .toList();
+        }
+
+        return List.of();
     }
 
     private Image createImage(MediaRequestDTO dto) {

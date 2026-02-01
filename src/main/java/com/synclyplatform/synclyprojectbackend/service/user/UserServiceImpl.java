@@ -5,7 +5,7 @@ import com.synclyplatform.synclyprojectbackend.dto.user.UserPresenceDTO;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.model.user.UserStatus;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
-import com.synclyplatform.synclyprojectbackend.utils.UserMapper;
+import com.synclyplatform.synclyprojectbackend.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -67,5 +67,12 @@ public class UserServiceImpl implements UserService {
                             .build();
                 })
                 .orElse(null);
+    }
+
+    @Override
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toDTO)
+                .collect(Collectors.toList());
     }
 }

@@ -7,6 +7,9 @@ import com.synclyplatform.synclyprojectbackend.repository.ConversationMessageRep
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import com.synclyplatform.synclyprojectbackend.service.conversation.ConversationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -62,25 +65,27 @@ public class ConversationMessageServiceImpl implements ConversationMessageServic
     }
 
     @Override
-    public List<ConversationMessage> findConversationMessages(String senderUsername, String recipientUsername) throws Exception {
+    public Page<ConversationMessage> findConversationMessages(String senderUsername, String recipientUsername, int page, int size) throws Exception {
         String conversationId = getConversationId(
                 senderUsername,
                 recipientUsername,
                 false
         );
 
-        return conversationMessageRepository.findAllByConversationId(conversationId);
+        Pageable pageable = PageRequest.of(page, size);
+        return conversationMessageRepository.findAllByConversationIdOrderByTimestampDesc(conversationId, pageable);
     }
 
     @Override
-    public List<ConversationMessage> findConversationMessages(User user, Long recipientId) throws Exception {
+    public Page<ConversationMessage> findConversationMessages(User user, Long recipientId, int page, int size) throws Exception {
         String conversationId = getConversationId(
                 user,
                 recipientId,
                 false
         );
 
-        return conversationMessageRepository.findAllByConversationId(conversationId);
+        Pageable pageable = PageRequest.of(page, size);
+        return conversationMessageRepository.findAllByConversationIdOrderByTimestampDesc(conversationId, pageable);
     }
 
     private String getConversationId(String senderUsername, String recipientUsername, boolean createNewConversationIfNotExists) throws Exception {

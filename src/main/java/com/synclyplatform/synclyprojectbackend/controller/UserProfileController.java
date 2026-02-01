@@ -2,6 +2,7 @@ package com.synclyplatform.synclyprojectbackend.controller;
 
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileUpdateRequestDTO;
+import com.synclyplatform.synclyprojectbackend.model.image.Image;
 import com.synclyplatform.synclyprojectbackend.service.user_profile.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,16 @@ public class UserProfileController {
     @GetMapping("/{userId}")
     public ResponseEntity<UserProfileDTO> findUserProfileByUserId(@PathVariable Long userId) {
         return new ResponseEntity<>(userProfileService.findByUserId(userId), HttpStatus.OK);
+    }
+
+    @GetMapping("/android-app/{userId}")
+    public ResponseEntity<UserProfileDTO> findUserProfileByUserIdForAndroidApp(@PathVariable Long userId) {
+        return new ResponseEntity<>(userProfileService.findByUserId(userId), HttpStatus.OK);
+    }
+
+    @GetMapping("/{userId}/avatar")
+    public ResponseEntity<Image> fetchUserAvatar(@PathVariable Long userId) {
+        return new ResponseEntity<>(userProfileService.getUserProfileAvatar(userId), HttpStatus.OK);
     }
 
     @PostMapping("/upload/avatar/{userId}")

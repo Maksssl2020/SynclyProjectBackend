@@ -3,13 +3,13 @@ package com.synclyplatform.synclyprojectbackend.service.user_profile;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileUpdateRequestDTO;
+import com.synclyplatform.synclyprojectbackend.model.image.Image;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
 import com.synclyplatform.synclyprojectbackend.repository.UserProfileRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
-import com.synclyplatform.synclyprojectbackend.service.authentication.AuthenticationService;
 import com.synclyplatform.synclyprojectbackend.service.media.MediaService;
-import com.synclyplatform.synclyprojectbackend.utils.UserProfileMapper;
+import com.synclyplatform.synclyprojectbackend.mapper.UserProfileMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +31,12 @@ public class UserProfileServiceImpl implements UserProfileService {
                 .orElseThrow(() -> new RuntimeException("User Profile Not Found!"));
 
         return userProfileMapper.toDTO(foundUserProfile);
+    }
+
+    @Override
+    @Transactional
+    public Image getUserProfileAvatar(long userId) {
+        return findByUserId(userId).getAvatar();
     }
 
     @Override

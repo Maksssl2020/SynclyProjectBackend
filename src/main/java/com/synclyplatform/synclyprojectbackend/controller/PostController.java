@@ -32,6 +32,30 @@ public class PostController {
         return new ResponseEntity<>(postService.getPostsByUserId(userId), HttpStatus.OK);
     }
 
+    @GetMapping("/android-app/user/{userId}")
+    public ResponseEntity<List<PostDTO>> getAllPostsByUserIdForAndroidApp(@PathVariable Long userId) {
+        return new ResponseEntity<>(postService.getPostsByUserId(userId), HttpStatus.OK);
+    }
+
+    @GetMapping("/android-app/user/dashboard/{userId}")
+    public ResponseEntity<List<PostDTO>> getUserForYouFeedForAndroid(
+            @PathVariable Long userId,
+            @RequestParam("offset") int offset,
+            @RequestParam("limit") int limit
+    ) {
+        return new ResponseEntity<>(postService.getForYouFeed(userId, offset, limit), HttpStatus.OK);
+    }
+
+    @GetMapping("/android-app/user/{userId}/feed/following")
+    public ResponseEntity<List<PostDTO>> getUserFollowedFeedForAndroid(
+            @PathVariable Long userId,
+            @RequestParam("offset") int offset,
+            @RequestParam("limit") int limit
+    ) {
+        return new ResponseEntity<>(postService.getFollowedFeed(userId, offset, limit), HttpStatus.OK);
+    }
+
+
     @GetMapping("/user/dashboard/{userId}")
     public ResponseEntity<List<PostDTO>> getUserForYouFeed(
             @PathVariable Long userId,
@@ -41,7 +65,6 @@ public class PostController {
         return new ResponseEntity<>(postService.getForYouFeed(userId, offset, limit), HttpStatus.OK);
     }
 
-
     @GetMapping("/user/{userId}/feed/following")
     public ResponseEntity<List<PostDTO>> getUserFollowedFeed(
             @PathVariable Long userId,
@@ -49,6 +72,15 @@ public class PostController {
             @RequestParam("limit") int limit
     ) {
         return new ResponseEntity<>(postService.getFollowedFeed(userId, offset, limit), HttpStatus.OK);
+    }
+
+    @GetMapping("/by-tag")
+    public ResponseEntity<List<PostDTO>> getAllPostsByTag(
+            @RequestParam("tag") String tag,
+            @RequestParam("offset") int offset,
+            @RequestParam("limit") int limit
+    ) {
+        return new ResponseEntity<>(postService.getPostsByTag(tag, offset, limit), HttpStatus.OK);
     }
 
     @PostMapping(value = "/create/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -66,15 +98,49 @@ public class PostController {
             photoDto.setPhotos(mediaList);
         }
 
+        postService.save(userId, postRequestDTO);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
 
-        if (postRequestDTO instanceof VideoPostRequestDTO videoDto && files != null) {
-            List<MediaRequestDTO> videoList = files.stream()
-                    .map(file -> new MediaRequestDTO(null, file, com.synclyplatform.synclyprojectbackend.dto.media.MediaType.VIDEO))
+    @PostMapping(value = "/android-app/create/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<HttpStatus> createPostAndroid(
+            @PathVariable Long userId,
+            @RequestPart(value = "data") String jsonData,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) throws JsonProcessingException {
+        PostRequestDTO postRequestDTO = objectMapper.readValue(jsonData, PostRequestDTO.class);
+
+        if (postRequestDTO instanceof PhotoPostRequestDTO photoDto && files != null) {
+            List<MediaRequestDTO> mediaList = files.stream()
+                    .map(file -> new MediaRequestDTO(null, file, com.synclyplatform.synclyprojectbackend.dto.media.MediaType.IMAGE))
                     .toList();
-            videoDto.setVideos(videoList);
+            photoDto.setPhotos(mediaList);
         }
 
         postService.save(userId, postRequestDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/update")
+    public ResponseEntity<HttpStatus> updatePost(
+            @RequestPart(value = "data") UpdatePostRequestDTO updatePostRequestDTO,
+            @RequestPart(value = "photoFiles", required = false) List<MultipartFile> photoFiles
+
+    ) {
+        if (updatePostRequestDTO.getUpdatedData() instanceof PhotoPostRequestDTO photoPostRequestDTO && photoFiles != null) {
+            List<MediaRequestDTO> mediaList = photoFiles.stream()
+                    .map(file -> new MediaRequestDTO(null, file, com.synclyplatform.synclyprojectbackend.dto.media.MediaType.IMAGE))
+                    .toList();
+            photoPostRequestDTO.setPhotos(mediaList);
+        }
+
+        postService.update(updatePostRequestDTO);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<HttpStatus> deletePost(@RequestParam("postId")  Long postId) {
+        postService.deletePost(postId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

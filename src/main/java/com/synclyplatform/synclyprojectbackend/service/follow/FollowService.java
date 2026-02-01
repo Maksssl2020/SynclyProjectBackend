@@ -11,8 +11,12 @@ public interface FollowService {
 
     List<TagDTO> getFollowedTags(Long userId);
     List<UserProfileDTO> getFollowedUsers(Long userId);
+    List<Long> getFollowedUsersIds(Long userId);
+
     void followTag(Long userId, Long tagId);
     void unfollowTag(Long userId, Long tagId);
     void followUser(Long userId, Long followedUserId);
     void unfollowUser(Long userId, Long followedUserId);
+    UserProfileDTO followUserAndroid(Long userId, Long followedUserId);
+    UserProfileDTO unfollowUserAndroid(Long userId, Long followedUserId);
 }

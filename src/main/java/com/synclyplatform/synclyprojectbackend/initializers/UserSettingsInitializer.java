@@ -9,7 +9,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-
+//
 //@Component
 //@RequiredArgsConstructor
 //public class UserSettingsInitializer implements CommandLineRunner {
@@ -24,8 +24,10 @@ import java.util.List;
 //
 //        users.forEach(user -> {
 //            try {
-//                UserSettings userSettings = userSettingsService.createUserSettings(user.getUserId());
-//                user.setUserSettings(userSettings);
+//                if (user.getUserSettings() == null) {
+//                    UserSettings userSettings = userSettingsService.createUserSettings(user.getUserId());
+//                    user.setUserSettings(userSettings);
+//                }
 //            } catch (Exception e) {
 //                throw new RuntimeException(e);
 //            }

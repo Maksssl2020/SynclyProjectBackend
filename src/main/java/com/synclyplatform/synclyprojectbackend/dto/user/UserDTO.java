@@ -24,5 +24,6 @@ public class UserDTO {
     private String lastActive;
     private UserRole role;
     private UserProfileDTO userProfile;
-    private Integer mutualFriendsCount;
+    private int mutualFriendsCount;
+    private long postCount;
 }

@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class UserProfileDTO {
 
     private Long userProfileId;
+    private Long profileOwnerId;
     private String username;
     private String email;
     private String displayName;

@@ -58,8 +58,8 @@ public class UserPresenceServiceImpl implements UserPresenceService {
                 "/topic/user/" + user.getUserId() + "/status",
                 Map.of(
                         "userId", user.getUserId(),
-                        "online", isOnline,
-                        "lastSeen", user.getLastActive().toString()
+                        "status", isOnline ? "online" : "offline",
+                        "lastSeen",user.getLastActive() != null ? user.getLastActive().toString() : ""
                 )
         );
     }

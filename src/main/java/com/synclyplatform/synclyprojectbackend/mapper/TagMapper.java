@@ -1,8 +1,10 @@
-package com.synclyplatform.synclyprojectbackend.utils;
+package com.synclyplatform.synclyprojectbackend.mapper;
 
+import com.synclyplatform.synclyprojectbackend.dto.tag.PostTagDTO;
 import com.synclyplatform.synclyprojectbackend.dto.tag.TagDTO;
 import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
 import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
+import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -10,9 +12,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class TagMapper {
     private final TagRepository tagRepository;
+    private final UserRepository userRepository;
 
     public TagDTO toDTO(Tag tag) {
         Long postsCount = tagRepository.countPostsByTagId(tag.getId());
+        Long followersCount = userRepository.countAllByFollowedTagsContaining(tag);
 
         return TagDTO.builder()
                 .id(tag.getId())
@@ -20,11 +24,19 @@ public class TagMapper {
                 .description(tag.getDescription())
                 .trending(tag.isTrending())
                 .postsCount(postsCount)
-                .followersCount(0)
+                .followersCount(followersCount)
                 .type(tag.getType().toString())
                 .tagCategory(tag.getTagCategory().getName())
                 .color(tag.getColor())
                 .createdAt(tag.getCreatedAt().toString())
+                .build();
+    }
+
+    public PostTagDTO toPostTagDTO(Tag tag) {
+        return PostTagDTO.builder()
+                .id(tag.getId())
+                .name(tag.getName())
+                .color(tag.getColor())
                 .build();
     }
 }

@@ -2,12 +2,15 @@ package com.synclyplatform.synclyprojectbackend.repository;
 
 import com.synclyplatform.synclyprojectbackend.dto.tag.TagUsageDTO;
 import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
+import com.synclyplatform.synclyprojectbackend.model.tag.TagType;
 import com.synclyplatform.synclyprojectbackend.model.tag_category.TagCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +20,13 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     Optional<Tag> findByName(String name);
     Long countByTagCategoryName(String tagCategoryName);
     Long countByName(String tagName);
+
+    @Query("""
+        SELECT t.name FROM Tag t
+    """)
+    List<String> findOnlyTagNames();
+
+    List<Tag> findAllByTagCategoryName(String tagCategoryName);
 
     @Query(value = """
         SELECT COUNT(pt.post_id) FROM post_tags pt WHERE tags_id = :tagId
@@ -51,4 +61,8 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         LOWER(t.name) LIKE LOWER(CONCAT('%', :query, '%'))
     """)
     List<Tag> searchTagByQuery(@Param("query") String query);
+
+    Long countAllByType(TagType type);
+
+    Long countAllByTypeAndCreatedAtBetween(TagType type, LocalDateTime createdAtAfter, LocalDateTime createdAtBefore);
 }

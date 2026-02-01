@@ -9,7 +9,8 @@ import com.synclyplatform.synclyprojectbackend.model.tag.TagType;
 import com.synclyplatform.synclyprojectbackend.model.tag_category.TagCategory;
 import com.synclyplatform.synclyprojectbackend.repository.TagCategoryRepository;
 import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
-import com.synclyplatform.synclyprojectbackend.utils.TagMapper;
+import com.synclyplatform.synclyprojectbackend.mapper.TagMapper;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -56,8 +57,23 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    public TagDTO getTagByName(String tagName) {
+        Tag foundTag = tagRepository.findByName(tagName)
+                .orElseThrow(() -> new EntityNotFoundException("Tag not found."));
+
+        return tagMapper.toDTO(foundTag);
+    }
+
+    @Override
     public List<TagDTO> findAllTags() {
         return tagRepository.findAll().stream()
+                .map(tagMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TagDTO> findRelatedTagsByCategory(String category) {
+        return tagRepository.findAllByTagCategoryName(category).stream()
                 .map(tagMapper::toDTO)
                 .collect(Collectors.toList());
     }

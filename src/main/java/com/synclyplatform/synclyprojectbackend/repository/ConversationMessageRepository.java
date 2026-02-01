@@ -1,6 +1,8 @@
 package com.synclyplatform.synclyprojectbackend.repository;
 
 import com.synclyplatform.synclyprojectbackend.model.conversation_message.ConversationMessage;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface ConversationMessageRepository extends JpaRepository<ConversationMessage,Long> {
 
-    List<ConversationMessage> findAllByConversationId(String conversationId);
+    Page<ConversationMessage> findAllByConversationIdOrderByTimestampDesc(String conversationId, Pageable pageable);
 
     @Query("""
         SELECT cm FROM ConversationMessage cm

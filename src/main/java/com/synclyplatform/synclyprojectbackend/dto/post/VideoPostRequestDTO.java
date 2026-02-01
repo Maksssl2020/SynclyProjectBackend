@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 
 import java.util.List;
 
@@ -20,6 +21,6 @@ public class VideoPostRequestDTO extends PostRequestDTO {
     @NotBlank(message = "Description cannot be empty.")
     private String description;
 
-    @Size(min = 1, max = 4, message = "Post must contain between 1 and 4 videos.")
-    private List<MediaRequestDTO> videos;
+    @Size(min = 1, max = 4, message = "Post must contain between 1 and 4 video urls.")
+    private List<@URL(message = "Please provide a valid URL.") String> videoUrls;
 }

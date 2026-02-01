@@ -2,13 +2,14 @@ package com.synclyplatform.synclyprojectbackend.service.post_collection;
 
 import com.synclyplatform.synclyprojectbackend.dto.post_collection.PostCollectionDTO;
 import com.synclyplatform.synclyprojectbackend.dto.post_collection.PostCollectionRequestDTO;
+import com.synclyplatform.synclyprojectbackend.mapper.PostCollectionMapper;
 import com.synclyplatform.synclyprojectbackend.model.post.Post;
 import com.synclyplatform.synclyprojectbackend.model.post_collection.PostCollection;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.repository.PostCollectionRepository;
 import com.synclyplatform.synclyprojectbackend.repository.PostRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
-import com.synclyplatform.synclyprojectbackend.utils.PostMapper;
+import com.synclyplatform.synclyprojectbackend.mapper.PostMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,7 @@ public class PostCollectionServiceImpl implements PostCollectionService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final PostCollectionRepository postCollectionRepository;
-    private final PostMapper postMapper;
+    private final PostCollectionMapper postCollectionMapper;
 
     @Override
     public void savePostCollection(Long userId, PostCollectionRequestDTO postCollectionRequest) {
@@ -93,33 +94,47 @@ public class PostCollectionServiceImpl implements PostCollectionService {
     }
 
     @Override
+    public void unsavePostFromCollectionByPostCollectionId(Long postId, Long postCollectionId) {
+        Post foundPost = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        PostCollection foundPostCollection = postCollectionRepository.findByIdAndPostsContaining(postCollectionId, foundPost)
+                .orElseThrow(() -> new RuntimeException("Post collection not found"));
+        User user = foundPostCollection.getUser();
+
+        PostCollection defaultPostCollection = postCollectionRepository.findByUserUserIdAndTitle(user.getUserId(), "ALL")
+                .orElse(null);
+
+        foundPostCollection.getPosts().remove(foundPost);
+
+        if (defaultPostCollection != null) {
+            defaultPostCollection.getPosts().remove(foundPost);
+            postCollectionRepository.save(defaultPostCollection);
+        }
+
+        postCollectionRepository.save(foundPostCollection);
+        foundPost.getSavedByUsers().remove(user);
+        user.getSavedPosts().remove(foundPost);
+        userRepository.save(user);
+        postRepository.save(foundPost);
+    }
+
+    @Override
     public PostCollectionDTO getPostCollectionById(Long postCollectionId) {
         PostCollection foundPostCollection = postCollectionRepository.findById(postCollectionId)
                 .orElseThrow(() -> new RuntimeException("Post collection not found."));
 
-        return createPostCollectionDTO(foundPostCollection);
+        return postCollectionMapper.toDTO(foundPostCollection);
     }
 
     @Override
     public List<PostCollectionDTO> getPostCollectionByUserId(Long userId) {
         return postCollectionRepository.findAllByUserUserId(userId).stream()
-                .map(this::createPostCollectionDTO)
+                .map(postCollectionMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public boolean existByNameAndUserId(Long userId, String postCollectionName) {
         return postCollectionRepository.existsByUserUserIdAndTitle(userId, postCollectionName);
-    }
-
-    private PostCollectionDTO createPostCollectionDTO(PostCollection postCollection) {
-        return PostCollectionDTO.builder()
-                .id(postCollection.getId())
-                .title(postCollection.getTitle())
-                .color(postCollection.getColor())
-                .posts(postCollection.getPosts().stream().map(postMapper::toDto).toList())
-                .isDefault(postCollection.isDefault())
-                .userId(postCollection.getUser().getUserId())
-                .build();
     }
 }

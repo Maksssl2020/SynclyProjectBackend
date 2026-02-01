@@ -1,15 +1,15 @@
-package com.synclyplatform.synclyprojectbackend.utils;
+package com.synclyplatform.synclyprojectbackend.mapper;
 
 import com.synclyplatform.synclyprojectbackend.dto.post.*;
+import com.synclyplatform.synclyprojectbackend.dto.tag.PostTagDTO;
 import com.synclyplatform.synclyprojectbackend.model.like.UserPostLike;
 import com.synclyplatform.synclyprojectbackend.model.post.*;
-import com.synclyplatform.synclyprojectbackend.model.post_collection.PostCollection;
+import com.synclyplatform.synclyprojectbackend.model.shared_post.SharedPost;
 import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.xml.stream.events.Comment;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
@@ -22,6 +22,9 @@ public abstract class PostMapper {
     @Autowired
     private PostMapperHelper postMapperHelper;
 
+    @Autowired
+    private TagMapper tagMapper;
+
     @Mapping(source = "id", target = "id")
     @Mapping(source = "createdAt", target = "createdAt")
     @Mapping(source = "updatedAt", target = "updatedAt")
@@ -29,10 +32,13 @@ public abstract class PostMapper {
     @Mapping(source = "author.username", target = "authorUsername")
     @Mapping(source = "author.userProfile.displayName", target = "authorName")
     @Mapping(source = "postType", target = "postType")
-    @Mapping(source = "tags", target = "tags", qualifiedByName = "mapTagsToNames")
+    @Mapping(source = "tags", target = "tags", qualifiedByName = "mapTagsToPostTags")
     @Mapping(source = "likes", target = "likesBy", qualifiedByName = "mapLikesToUserIds")
     @Mapping(source = "savedByUsers", target = "savedBy", qualifiedByName = "mapSavedByToUserIds")
+    @Mapping(source = "sharedBy", target = "sharedBy", qualifiedByName = "mapSharedByToUserIds")
     @Mapping(source = "id", target = "commentsCount", qualifiedByName = "countPostComments")
+    @Mapping(source = "id", target = "likesCount", qualifiedByName = "countPostLikes")
+    @Mapping(source = "author.userProfile.profileImage", target = "authorAvatar")
     protected abstract void mapBaseFields(Post post, @MappingTarget PostDTO dto);
 
     public TextPostDTO toDto(TextPost post) {
@@ -80,15 +86,7 @@ public abstract class PostMapper {
         mapBaseFields(post, dto);
         dto.setDescription(post.getDescription());
 
-        List<String> videoUrls = post.getVideos().stream()
-                .map(video -> {
-                    if (video.getUrl() != null) {
-                        return video.getUrl();
-                    } else {
-                        return Base64.getEncoder().encodeToString(video.getVideoData());
-                    }
-                })
-                .toList();
+        List<String> videoUrls = post.getVideoUrls();
         dto.setVideoUrls(videoUrls);
 
         return dto;
@@ -105,11 +103,11 @@ public abstract class PostMapper {
         return dto;
     }
 
-    @Named("mapTagsToNames")
-    public List<String> mapTagsToNames(List<Tag> tags) {
+    @Named("mapTagsToPostTags")
+    public List<PostTagDTO> mapTagsToNames(List<Tag> tags) {
         if (tags == null) return null;
         return tags.stream()
-                .map(Tag::getName)
+                .map(tagMapper::toPostTagDTO)
                 .collect(Collectors.toList());
     }
 
@@ -118,6 +116,15 @@ public abstract class PostMapper {
         if (likes == null) return List.of();
         return likes.stream()
                 .map(userPostLike -> userPostLike.getUser().getUserId())
+                .collect(Collectors.toList());
+    }
+
+    @Named("mapSharedByToUserIds")
+    public List<Long> mapSharedByToUserIds(List<SharedPost> sharedBy) {
+        if (sharedBy == null) return List.of();
+        return sharedBy.stream()
+                .map(SharedPost::getSharedBy)
+                .map(User::getUserId)
                 .collect(Collectors.toList());
     }
 
@@ -132,6 +139,12 @@ public abstract class PostMapper {
     public long countPostComments(Long id) {
         return postMapperHelper.countPostComments(id);
     }
+
+    @Named("countPostLikes")
+    public long countPostLikes(Long id) {
+        return postMapperHelper.countPostLikes(id);
+    }
+
 
     @Mapping(target = "tags", ignore = true)
     public abstract TextPost fromRequestDto(TextPostRequestDTO dto);

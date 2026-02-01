@@ -13,7 +13,9 @@ public interface TagService {
 
     void saveMainTag(MainTagRequestDTO mainTagRequest);
     void saveCommonTag(CommonTagRequestDTO commonTagRequest);
+    TagDTO getTagByName(String tagName);
     List<TagDTO> findAllTags();
+    List<TagDTO> findRelatedTagsByCategory(String category);
     List<TagUsageDTO> findPopularTags(int limit);
     List<TagUsageDTO> findTrendingTags(int limit);
     List<TagDTO> searchTags(String query);

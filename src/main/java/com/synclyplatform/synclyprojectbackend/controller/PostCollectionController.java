@@ -22,6 +22,12 @@ public class PostCollectionController {
         return new ResponseEntity<>(postCollectionService.getPostCollectionById(postCollectionId), HttpStatus.OK);
     }
 
+    @GetMapping("/android-app/{postCollectionId}")
+    public ResponseEntity<PostCollectionDTO> getPostCollectionByIdAndroid(@PathVariable Long postCollectionId) {
+        return new ResponseEntity<>(postCollectionService.getPostCollectionById(postCollectionId), HttpStatus.OK);
+    }
+
+
     @GetMapping("/all-by-user/{userId}")
     public ResponseEntity<List<PostCollectionDTO>> getAllPostCollectionsByUserId(@PathVariable Long userId) {
         return new ResponseEntity<>(postCollectionService.getPostCollectionByUserId(userId), HttpStatus.OK);
@@ -47,6 +53,12 @@ public class PostCollectionController {
     @DeleteMapping("/unsave-post/{userId}/{postId}")
     public ResponseEntity<HttpStatus> unsavePostFromCollection(@PathVariable Long userId, @PathVariable Long postId) {
         postCollectionService.unsavePostFromCollection(postId, userId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("/unsave-post/by-post-collection/{postCollectionId}/{postId}")
+    public ResponseEntity<HttpStatus> unsavePostFromCollectionByPostCollectionId(@PathVariable Long postCollectionId, @PathVariable Long postId) {
+        postCollectionService.unsavePostFromCollectionByPostCollectionId(postId, postCollectionId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

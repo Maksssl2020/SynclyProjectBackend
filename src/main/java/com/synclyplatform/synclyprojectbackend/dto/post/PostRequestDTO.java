@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -17,12 +18,12 @@ import java.util.List;
         property = "type"
 )
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = TextPostRequestDTO.class, name = "text"),
-        @JsonSubTypes.Type(value = QuotePostRequestDTO.class, name = "quote"),
-        @JsonSubTypes.Type(value = PhotoPostRequestDTO.class, name = "photo"),
-        @JsonSubTypes.Type(value = VideoPostRequestDTO.class, name = "video"),
-        @JsonSubTypes.Type(value = LinkPostRequestDTO.class, name = "link")
+        @JsonSubTypes.Type(value = TextPostRequestDTO.class, name = "TEXT"),
+        @JsonSubTypes.Type(value = QuotePostRequestDTO.class, name = "QUOTE"),
+        @JsonSubTypes.Type(value = PhotoPostRequestDTO.class, name = "PHOTO"),
+        @JsonSubTypes.Type(value = VideoPostRequestDTO.class, name = "VIDEO"),
+        @JsonSubTypes.Type(value = LinkPostRequestDTO.class, name = "LINK")
 })
 public class PostRequestDTO {
-    private List<String> tags;
+    private Set<String> tags;
 }

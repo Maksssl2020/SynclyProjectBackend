@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.validator.constraints.URL;
 
 import java.util.List;
 
@@ -24,12 +25,7 @@ public class VideoPost extends Post {
     @NotBlank(message = "Description cannot be empty.")
     private String description;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinTable(
-            name = "video_post_videos",
-            joinColumns = @JoinColumn(name = "video_post_id"),
-            inverseJoinColumns = @JoinColumn(name = "video_id")
-    )
-    @Size(min = 1, max = 4)
-    private List<Video> videos;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Size(min = 1, message = "At least one video link must be provided.")
+    private List<@URL(message = "Please provide a valid URL.") String> videoUrls;
 }

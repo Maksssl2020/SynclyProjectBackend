@@ -1,6 +1,7 @@
 package com.synclyplatform.synclyprojectbackend.model.post;
 
 import com.synclyplatform.synclyprojectbackend.model.like.UserPostLike;
+import com.synclyplatform.synclyprojectbackend.model.shared_post.SharedPost;
 import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import jakarta.persistence.*;
@@ -42,6 +43,9 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserPostLike> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "originalPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SharedPost> sharedBy = new ArrayList<>();
 
     @ManyToMany(mappedBy = "savedPosts")
     private Set<User> savedByUsers = new HashSet<>();
