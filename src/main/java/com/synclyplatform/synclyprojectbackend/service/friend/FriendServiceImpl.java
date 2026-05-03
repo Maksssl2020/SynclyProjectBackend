@@ -204,6 +204,11 @@ public class FriendServiceImpl implements FriendService {
         return FriendStatus.NONE.toString();
     }
 
+    @Override
+    public Boolean checkIsFriend(User user, Long userId) {
+        return friendRepository.existsByRequesterUserIdAndReceiverUserIdAndStatus(user.getUserId(), userId, FriendStatus.ACCEPTED);
+    }
+
     public List<User> getFriendListNotDTO(Long userId) {
         User foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));

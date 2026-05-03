@@ -3,6 +3,7 @@ package com.synclyplatform.synclyprojectbackend.service.friend;
 import com.synclyplatform.synclyprojectbackend.dto.friend.FriendDTO;
 import com.synclyplatform.synclyprojectbackend.dto.friend.FriendUserDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
+import com.synclyplatform.synclyprojectbackend.model.user.User;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
@@ -24,4 +25,6 @@ public interface FriendService {
     List<UserDTO> getSuggestedFriends(Long userId);
     List<Long> getUserFiendIds(Long userId);
     String getRequestStatus(Long requesterId, Long receiverId);
+
+    Boolean checkIsFriend(User user, Long userId);
 }

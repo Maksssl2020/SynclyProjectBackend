@@ -74,8 +74,7 @@ public class TagController {
     }
 
     @PostMapping("/create/common")
-    public ResponseEntity<HttpStatus> createCommon(@RequestBody CommonTagRequestDTO commonTagRequest) {
-        tagService.saveCommonTag(commonTagRequest);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<TagDTO> createCommon(@RequestBody CommonTagRequestDTO commonTagRequest) {
+        return new ResponseEntity<>(tagService.saveCommonTag(commonTagRequest), HttpStatus.CREATED);
     }
 }

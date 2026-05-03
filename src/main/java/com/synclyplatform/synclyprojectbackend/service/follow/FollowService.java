@@ -2,6 +2,7 @@ package com.synclyplatform.synclyprojectbackend.service.follow;
 
 import com.synclyplatform.synclyprojectbackend.dto.tag.TagDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileDTO;
+import com.synclyplatform.synclyprojectbackend.model.user.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,4 +20,6 @@ public interface FollowService {
     void unfollowUser(Long userId, Long followedUserId);
     UserProfileDTO followUserAndroid(Long userId, Long followedUserId);
     UserProfileDTO unfollowUserAndroid(Long userId, Long followedUserId);
+
+    Boolean isUserFollowed(User user, Long userProfileId);
 }

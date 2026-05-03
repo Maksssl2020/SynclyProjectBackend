@@ -69,7 +69,7 @@ public class ConversationMessageServiceImpl implements ConversationMessageServic
         String conversationId = getConversationId(
                 senderUsername,
                 recipientUsername,
-                false
+                true
         );
 
         Pageable pageable = PageRequest.of(page, size);
@@ -81,7 +81,7 @@ public class ConversationMessageServiceImpl implements ConversationMessageServic
         String conversationId = getConversationId(
                 user,
                 recipientId,
-                false
+                true
         );
 
         Pageable pageable = PageRequest.of(page, size);

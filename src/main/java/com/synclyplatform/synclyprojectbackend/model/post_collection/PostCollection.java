@@ -14,6 +14,12 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_user_title",
+                columnNames = {"user_id", "title"}
+        )
+)
 public class PostCollection {
 
     @Id

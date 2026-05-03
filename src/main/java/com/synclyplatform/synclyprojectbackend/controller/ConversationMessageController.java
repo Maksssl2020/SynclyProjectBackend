@@ -43,11 +43,15 @@ public class ConversationMessageController {
                 savedConversationMessage
         );
 
-        messagingTemplate.convertAndSendToUser(
-                savedConversationMessage.getSenderUsername(),
-                "/queue/messages",
-                savedConversationMessage
-        );
+        if (!savedConversationMessage.getSenderUsername()
+                .equals(savedConversationMessage.getRecipientUsername())) {
+
+            messagingTemplate.convertAndSendToUser(
+                    savedConversationMessage.getSenderUsername(),
+                    "/queue/messages",
+                    savedConversationMessage
+            );
+        }
 
         System.out.println("Saved conversation message: " + savedConversationMessage.getContent());
     }

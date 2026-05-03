@@ -66,6 +66,11 @@ public class FriendController {
         return new ResponseEntity<>(friendService.getRequestStatus(user.getUserId(), userId), HttpStatus.OK);
     }
 
+    @GetMapping("/user/is-friend")
+    public ResponseEntity<Boolean> checkIsFriend(@AuthenticationPrincipal User user, @RequestParam("userId") Long userId) {
+        return new ResponseEntity<>(friendService.checkIsFriend(user, userId), HttpStatus.OK);
+    }
+
     @PostMapping("/send/request")
     public ResponseEntity<HttpStatus> sendFriendRequest(
             @RequestParam("requesterId") Long requesterId,

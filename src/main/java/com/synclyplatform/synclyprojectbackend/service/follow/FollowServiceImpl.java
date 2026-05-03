@@ -10,6 +10,7 @@ import com.synclyplatform.synclyprojectbackend.repository.UserProfileRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import com.synclyplatform.synclyprojectbackend.mapper.TagMapper;
 import com.synclyplatform.synclyprojectbackend.mapper.UserProfileMapper;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -130,5 +131,10 @@ public class FollowServiceImpl implements FollowService {
         unfollowUser(userId, followedUserId);
 
         return userProfileMapper.toDTO(followedUserFound);
+    }
+
+    @Override
+    public Boolean isUserFollowed(User user, Long userProfileId) {
+        return userRepository.existsFollowedProfile(user.getUserId(), userProfileId);
     }
 }

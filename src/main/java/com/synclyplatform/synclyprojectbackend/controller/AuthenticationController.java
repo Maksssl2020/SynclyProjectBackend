@@ -27,7 +27,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponseDTO> loginUser(@Valid @RequestBody AuthenticationRequestDTO authenticationRequest) {
+    public ResponseEntity<AuthenticationResponseDTO> loginUser(@Valid @RequestBody AuthenticationRequestDTO authenticationRequest) throws Exception {
         return new ResponseEntity<>(authenticationService.authenticate(authenticationRequest), HttpStatus.CREATED);
     }
 
@@ -65,9 +65,9 @@ public class AuthenticationController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @MessageMapping("/user.addUser")
     @SendTo("/user/topic")
-    public AuthenticationResponseDTO login(@Payload AuthenticationRequestDTO authenticationRequest) {
+    @MessageMapping("/user.addUser")
+    public AuthenticationResponseDTO login(@Payload AuthenticationRequestDTO authenticationRequest) throws Exception {
         return authenticationService.authenticate(authenticationRequest);
     }
 }

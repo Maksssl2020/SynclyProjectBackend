@@ -5,6 +5,6 @@ import org.springframework.stereotype.Service;
 @Service
 public interface TwoFactorCodeService {
 
-    void generateTwoFactorCode(Long userId, String emailAddress, boolean authenticationAsAdmin) throws Exception;
+    void generateTwoFactorCode(Long userId, String emailAddress) throws Exception;
     boolean verifyTwoFactorCode(Long userId, String code);
 }

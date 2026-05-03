@@ -10,6 +10,7 @@ import com.synclyplatform.synclyprojectbackend.model.tag_category.TagCategory;
 import com.synclyplatform.synclyprojectbackend.repository.TagCategoryRepository;
 import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
 import com.synclyplatform.synclyprojectbackend.mapper.TagMapper;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,14 +46,30 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public void saveCommonTag(CommonTagRequestDTO commonTagRequest) {
-        if (!tagExists(commonTagRequest.getName())) {
+    public TagDTO saveCommonTag(CommonTagRequestDTO commonTagRequest) {
+        return tagMapper.toDTO(createCommonTag(commonTagRequest.getName()));
+    }
+
+    @Override
+    public Tag saveCommonTag(String tagName) {
+        return createCommonTag(tagName);
+    }
+
+    private Tag createCommonTag(String tagName) {
+        if (!tagExists(tagName)) {
+            TagCategory common = tagCategoryRepository.findByName("COMMON")
+                    .orElseThrow(() -> new EntityNotFoundException("Tag category name not found."));
+
             Tag tag = Tag.builder()
-                    .name(commonTagRequest.getName())
+                    .name(tagName)
                     .type(TagType.COMMON)
+                    .color("#8b5cf6")
+                    .tagCategory(common)
                     .build();
 
-            tagRepository.save(tag);
+            return tagRepository.save(tag);
+        } else {
+            throw new EntityExistsException("Tag exists.");
         }
     }
 

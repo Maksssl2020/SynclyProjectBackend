@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -27,10 +26,29 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     @Query("""
+        SELECT COUNT(u) > 0 FROM User u WHERE
+            u.userId = :userId AND
+            u.role = 'ADMIN'
+    """)
+    boolean isAdminByUserId(@Param("userId") Long userId);
+
+    @Query("""
+        SELECT COUNT(u) > 0
+        FROM User u
+        JOIN u.followedUsers fu
+            WHERE u.userId = :userId
+            AND fu.userProfileId = :userProfileId
+    """)
+    boolean existsFollowedProfile(@Param("userId") Long userId, @Param("userProfileId") Long userProfileId);
+
+    @Query("""
         SELECT u FROM User u WHERE
-        LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR
-        LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR
-        LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))
+            (
+                LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR
+                LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR
+                LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))
+            )
+                AND u.role <> 'ADMIN'
     """)
     List<User> searchUserByQuery(@Param("query") String query);
 
@@ -51,7 +69,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = """
         SELECT * FROM app_user u
         WHERE u.user_id <> :userId
-          AND u.user_id NOT IN (:excludedIds)
+            AND u.user_id NOT IN (:excludedIds)
+            AND u.role <> 'ADMIN'
         ORDER BY RANDOM()
         LIMIT :limit
     """, nativeQuery = true)

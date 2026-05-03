@@ -38,6 +38,7 @@ public class Tag {
     @Enumerated(EnumType.STRING)
     private TagType type;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tag_category_id")
     private TagCategory tagCategory;
 }

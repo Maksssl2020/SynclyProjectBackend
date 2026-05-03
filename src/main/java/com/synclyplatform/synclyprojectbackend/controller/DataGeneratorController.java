@@ -4,10 +4,7 @@ import com.synclyplatform.synclyprojectbackend.service.data_generator.DataGenera
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.MalformedURLException;
 
@@ -19,7 +16,7 @@ public class DataGeneratorController {
     private final DataGeneratorService dataGeneratorService;
 
     @PostMapping("/users/{count}")
-    public ResponseEntity<HttpStatus> generateUsers(@PathVariable int count) {
+    public ResponseEntity<HttpStatus> generateUsers(@PathVariable int count) throws Exception {
         for (int i = 0; i < count; i++) {
             dataGeneratorService.generateUser();
         }
@@ -34,5 +31,10 @@ public class DataGeneratorController {
         }
 
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PostMapping("/avatar")
+    public ResponseEntity<String> generateAvatar(@RequestBody String seed) {
+        return new ResponseEntity<>(dataGeneratorService.generateAvatarUrl(seed), HttpStatus.CREATED);
     }
 }

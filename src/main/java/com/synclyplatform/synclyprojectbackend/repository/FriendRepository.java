@@ -19,6 +19,12 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     List<Friend> findByReceiverAndStatus(User receiver, FriendStatus status);
     List<Friend> findByRequesterUserIdAndStatus(Long requesterId, FriendStatus status);
 
+    boolean existsByRequesterUserIdAndReceiverUserIdAndStatus(
+            Long requesterId,
+            Long receiverId,
+            FriendStatus status
+    );
+
     @Query("""
         SELECT f FROM Friend f WHERE (f.requester = :user OR f.receiver = :user) AND f.status = 'ACCEPTED'
     """)

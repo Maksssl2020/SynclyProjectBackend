@@ -34,6 +34,11 @@ public class FollowController {
         return new ResponseEntity<>(followService.getFollowedUsersIds(userId), HttpStatus.OK);
     }
 
+    @GetMapping("/user/is-followed/{userProfileId}")
+    public ResponseEntity<Boolean> isUserFollowed(@AuthenticationPrincipal User user, @PathVariable Long userProfileId) {
+        return new ResponseEntity<>(followService.isUserFollowed(user, userProfileId), HttpStatus.OK);
+    }
+
     @PostMapping("/follow/tag/{userId}/{tagId}")
     public ResponseEntity<HttpStatus> followTag(@PathVariable Long userId, @PathVariable Long tagId) {
         followService.followTag(userId, tagId);

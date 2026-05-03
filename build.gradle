@@ -45,10 +45,11 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
     implementation 'org.jsoup:jsoup:1.21.1'
-    implementation 'net.datafaker:datafaker:2.4.4'
+    implementation 'net.datafaker:datafaker:2.5.4'
     implementation 'commons-io:commons-io:2.20.0'
     implementation 'org.springframework:spring-test:6.2.0'
     implementation 'org.apache.commons:commons-text:1.14.0'
+    implementation 'org.springframework.boot:spring-boot-starter-mail:3.3.4'
 }
 
 tasks.named('test') {

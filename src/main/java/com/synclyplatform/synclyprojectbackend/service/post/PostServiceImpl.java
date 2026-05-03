@@ -11,12 +11,14 @@ import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import com.synclyplatform.synclyprojectbackend.service.media.MediaService;
 import com.synclyplatform.synclyprojectbackend.mapper.PostMapper;
+import com.synclyplatform.synclyprojectbackend.service.tag.TagService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -31,8 +33,10 @@ public class PostServiceImpl implements PostService {
     private final TagRepository tagRepository;
     private final PostMapper postMapper;
     private final MediaService mediaService;
+    private final TagService tagService;
 
     @Override
+    @Transactional
     public void save(Long userId, PostRequestDTO postRequestDTO) {
         User foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -153,6 +157,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public void update(UpdatePostRequestDTO updatePostRequestDTO) {
         Post post = postRepository.findById(updatePostRequestDTO.getPostId())
                 .orElseThrow(() -> new EntityNotFoundException("Post not found"));
@@ -199,10 +204,11 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    private Post compareAndUpdateTags(Post post, Set<String> tags) {
+    @Transactional
+    protected Post compareAndUpdateTags(Post post, Set<String> tags) {
         Set<String> mappedTags = post.getTags().stream().map(Tag::getName).collect(Collectors.toSet());
 
-        if (tags != null && tags.equals(mappedTags)) {
+        if (tags != null && !tags.equals(mappedTags)) {
             List<Tag> updatedTags = tags.stream()
                     .map(this::findOrCreateTag)
                     .toList();
@@ -214,7 +220,8 @@ public class PostServiceImpl implements PostService {
         return post;
     }
 
-    private TextPost updateTextPost(TextPost textPost, TextPostRequestDTO textPostRequestDTO) {
+    @Transactional
+    protected TextPost updateTextPost(TextPost textPost, TextPostRequestDTO textPostRequestDTO) {
         if (textPostRequestDTO.getTitle() != null) {
             textPost.setTitle(textPostRequestDTO.getTitle());
         }
@@ -225,7 +232,8 @@ public class PostServiceImpl implements PostService {
         return textPost;
     }
 
-    private QuotePost updateQuotePost(QuotePost quotePost, QuotePostRequestDTO quotePostRequestDTO) {
+    @Transactional
+    protected QuotePost updateQuotePost(QuotePost quotePost, QuotePostRequestDTO quotePostRequestDTO) {
         if (quotePostRequestDTO.getQuote() != null) {
             quotePost.setQuote(quotePostRequestDTO.getQuote());
         }
@@ -236,7 +244,8 @@ public class PostServiceImpl implements PostService {
         return quotePost;
     }
 
-    private PhotoPost updatePhotoPost(PhotoPost photoPost, PhotoPostRequestDTO photoPostRequestDTO) {
+    @Transactional
+    protected PhotoPost updatePhotoPost(PhotoPost photoPost, PhotoPostRequestDTO photoPostRequestDTO) {
         if (photoPostRequestDTO.getCaption() != null) {
             photoPost.setCaption(photoPostRequestDTO.getCaption());
         }
@@ -247,7 +256,8 @@ public class PostServiceImpl implements PostService {
         return photoPost;
     }
 
-    private VideoPost updateVideoPost(VideoPost videoPost, VideoPostRequestDTO videoPostRequestDTO) {
+    @Transactional
+    protected VideoPost updateVideoPost(VideoPost videoPost, VideoPostRequestDTO videoPostRequestDTO) {
         if (videoPostRequestDTO.getDescription() != null) {
             videoPost.setDescription(videoPostRequestDTO.getDescription());
         }
@@ -259,7 +269,8 @@ public class PostServiceImpl implements PostService {
         return videoPost;
     }
 
-    private LinkPost updateLinkPost(LinkPost linkPost, LinkPostRequestDTO linkPostRequestDTO) {
+    @Transactional
+    protected LinkPost updateLinkPost(LinkPost linkPost, LinkPostRequestDTO linkPostRequestDTO) {
         if (linkPostRequestDTO.getTitle() != null) {
             linkPost.setTitle(linkPostRequestDTO.getTitle());
         }
@@ -276,11 +287,6 @@ public class PostServiceImpl implements PostService {
 
     private Tag findOrCreateTag(String name) {
         return tagRepository.findByName(name)
-                .orElseGet(() -> {
-                    Tag newTag = new Tag();
-                    newTag.setType(TagType.COMMON);
-                    newTag.setName(name);
-                    return newTag;
-                });
+                .orElseGet(() -> tagService.saveCommonTag(name));
     }
 }

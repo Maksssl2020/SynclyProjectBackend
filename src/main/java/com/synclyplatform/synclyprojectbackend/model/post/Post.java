@@ -39,7 +39,7 @@ public class Post {
     private User author;
 
     @ManyToMany
-    private List<Tag> tags;
+    private List<Tag> tags = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserPostLike> likes = new ArrayList<>();

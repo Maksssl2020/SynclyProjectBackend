@@ -23,7 +23,7 @@ public class TwoFactorCodeServiceImpl implements TwoFactorCodeService {
 
     @Override
     @Transactional
-    public void generateTwoFactorCode(Long userId, String emailAddress, boolean authenticationAsAdmin) throws Exception {
+    public void generateTwoFactorCode(Long userId, String emailAddress) throws Exception {
         User foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new Exception("User not found, id: " + userId));
 
@@ -43,7 +43,7 @@ public class TwoFactorCodeServiceImpl implements TwoFactorCodeService {
 
         twoFactorCodeRepository.save(twoFactorCode);
 
-        emailSenderService.sendTwoFactorCodeEmail(emailAddress, foundUser.getUsername(), code, "Autoryzacja");
+        emailSenderService.sendTwoFactorCodeEmail(emailAddress, foundUser.getUsername(), code, "Syncly Authorization Code");
     }
 
     @Override

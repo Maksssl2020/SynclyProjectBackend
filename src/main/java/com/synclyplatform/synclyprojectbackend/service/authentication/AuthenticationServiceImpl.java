@@ -109,7 +109,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO authenticationRequest) {
+    public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO authenticationRequest) throws Exception {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authenticationRequest.getUsername(),
@@ -121,6 +121,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setStatus(UserStatus.ONLINE);
 
         boolean isTwoFactorAuthentication = user.getUserSettings().isTwoFactorAuthentication();
+
+        if (isTwoFactorAuthentication) {
+            twoFactorCodeService.generateTwoFactorCode(user.getUserId(), user.getEmail());
+        }
 
         return createAuthenticationResponse(user, isTwoFactorAuthentication);
     }

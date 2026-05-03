@@ -5,6 +5,8 @@ import com.synclyplatform.synclyprojectbackend.service.user.UserPresenceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
@@ -29,37 +31,67 @@ public class PresenceEventListener {
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectEvent event) {
-        String username = extractUsernameFromEvent(event);
-        log.info("Received WebSocket connection event for user {}", username);
-        userPresenceService.setOnlineStatus(username);
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
+        String username = extractUsernameFromConnect(headerAccessor);
+
+        if (username == null) {
+            log.warn("Cannot extract username from WebSocket CONNECT");
+            return;
+        }
+
+        headerAccessor.getSessionAttributes().put("username", username);
+
+        log.info("WebSocket connected: {}", username);
+
+        userPresenceService.setOnlineStatus(username);
         messagingTemplate.convertAndSend("/topic/presence", username + " is online.");
     }
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
-        String username = extractUsernameFromEvent(event);
-        log.info("Received WebSocket disconnection event for user {}", username);
-        userPresenceService.setOfflineStatus(username);
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
-        messagingTemplate.convertAndSend("/topic/presence", username  + " is offline.");
+        String username = Optional.ofNullable(headerAccessor.getSessionAttributes())
+                .map(attrs -> (String) attrs.get("username"))
+                .orElse(null);
+
+        if (username == null) {
+            log.warn("Cannot extract username from WebSocket DISCONNECT");
+            return;
+        }
+
+        log.info("WebSocket disconnected: {}", username);
+
+        userPresenceService.setOfflineStatus(username);
+        messagingTemplate.convertAndSend("/topic/presence", username + " is offline.");
     }
 
-    private String extractUsernameFromEvent(AbstractSubProtocolEvent event) {
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+    @MessageMapping("/presence")
+    public void updatePresence(@Payload PresenceRequest request, Principal principal) {
+        String username = principal.getName();
+
+        if ("offline".equals(request.getStatus())) {
+            userPresenceService.setOfflineStatus(username);
+            messagingTemplate.convertAndSend("/topic/presence", username + " is offline.");
+        }
+
+        if ("online".equals(request.getStatus())) {
+            userPresenceService.setOnlineStatus(username);
+            messagingTemplate.convertAndSend("/topic/presence", username + " is online.");
+        }
+    }
+
+    private String extractUsernameFromConnect(StompHeaderAccessor headerAccessor) {
         String token = Optional.ofNullable(headerAccessor.getFirstNativeHeader("Authorization"))
                 .filter(h -> h.startsWith("Bearer "))
                 .map(h -> h.substring(7))
                 .orElse(null);
 
-        if (token != null) {
-            String username = jwtService.extractUsername(token);
-            log.info("CONNECTED user: {}", username);
-            return username;
-        } else {
-            log.warn("No token found in CONNECT headers");
+        if (token == null) {
+            return null;
         }
 
-        return "anonymous";
+        return jwtService.extractUsername(token);
     }
 }
