@@ -15,9 +15,9 @@ public class TagDTO {
 
     private Long id;
     private String name;
-    private String description;
     private long postsCount;
     private long followersCount;
+    private int postsThisWeek;
     private boolean trending;
     private String type;
     private String tagCategory;

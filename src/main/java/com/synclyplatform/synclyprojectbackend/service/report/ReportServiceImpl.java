@@ -14,6 +14,7 @@ import com.synclyplatform.synclyprojectbackend.repository.*;
 import com.synclyplatform.synclyprojectbackend.mapper.ReportMapper;
 import com.synclyplatform.synclyprojectbackend.service.activity.ActivityService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -62,6 +63,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    @Transactional
     public void resolve(User user, ResolveReportRequestDTO resolveReportRequestDTO) {
         Report foundReport = reportRepository.findById(resolveReportRequestDTO.getReportId())
                 .orElseThrow(() -> new EntityNotFoundException("Report not found."));
@@ -76,6 +78,7 @@ public class ReportServiceImpl implements ReportService {
                 ActivityRequestDTO.builder()
                         .actionType(getActivityActionType(resolveReportRequestDTO.getReportStatus()))
                         .target(foundReport.getTitle())
+                        .targetId(foundReport.getId())
                         .userId(user.getUserId())
                         .targetType(ActivityTargetType.REPORT)
                         .build()

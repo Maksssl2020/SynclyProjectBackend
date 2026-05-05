@@ -3,22 +3,23 @@ package com.synclyplatform.synclyprojectbackend.service.media;
 import com.synclyplatform.synclyprojectbackend.dto.media.MediaDTO;
 import com.synclyplatform.synclyprojectbackend.dto.media.MediaRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.media.MediaType;
-import com.synclyplatform.synclyprojectbackend.model.audio.Audio;
 import com.synclyplatform.synclyprojectbackend.model.image.Image;
 import com.synclyplatform.synclyprojectbackend.model.post.PhotoPost;
 import com.synclyplatform.synclyprojectbackend.model.post.Post;
 import com.synclyplatform.synclyprojectbackend.model.post.PostType;
-import com.synclyplatform.synclyprojectbackend.model.post.VideoPost;
 import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
 import com.synclyplatform.synclyprojectbackend.model.video.Video;
-import com.synclyplatform.synclyprojectbackend.repository.*;
+import com.synclyplatform.synclyprojectbackend.repository.ImageRepository;
+import com.synclyplatform.synclyprojectbackend.repository.PostRepository;
+import com.synclyplatform.synclyprojectbackend.repository.UserProfileRepository;
+import com.synclyplatform.synclyprojectbackend.repository.VideoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.apache.commons.io.IOUtils;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -139,23 +140,6 @@ public class MediaServiceImpl implements MediaService {
         }
 
         return image;
-    }
-
-    private Audio createAudio(MediaRequestDTO dto) {
-        Audio audio = new Audio();
-
-        if (dto.getMediaFile() != null) {
-            try {
-                byte[] bytes = dto.getMediaFile().getBytes();
-                audio.setAudioData(bytes);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            audio.setUrl(dto.getUrl());
-        }
-
-        return audio;
     }
 
     private Video createVideo(MediaRequestDTO dto) {

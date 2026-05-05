@@ -11,6 +11,7 @@ public class ActivityMapper {
         return ActivityDTO.builder()
                 .id(activity.getId())
                 .userId(activity.getUser().getUserId())
+                .targetId(activity.getTargetId())
                 .actionType(activity.getActionType())
                 .target(activity.getTarget())
                 .targetType(activity.getTargetType())

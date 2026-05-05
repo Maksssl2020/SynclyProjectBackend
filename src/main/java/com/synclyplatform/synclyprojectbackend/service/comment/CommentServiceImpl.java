@@ -1,22 +1,29 @@
 package com.synclyplatform.synclyprojectbackend.service.comment;
 
+import com.synclyplatform.synclyprojectbackend.dto.activity.ActivityRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.comment.PostCommentDTO;
 import com.synclyplatform.synclyprojectbackend.dto.comment.PostCommentReplyRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.comment.PostCommentRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.comment.UpdateCommentRequestDTO;
+import com.synclyplatform.synclyprojectbackend.model.activity.ActivityActionType;
+import com.synclyplatform.synclyprojectbackend.model.activity.ActivityTargetType;
 import com.synclyplatform.synclyprojectbackend.model.comment.PostComment;
 import com.synclyplatform.synclyprojectbackend.model.post.Post;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
+import com.synclyplatform.synclyprojectbackend.model.user.UserRole;
 import com.synclyplatform.synclyprojectbackend.repository.PostCommentRepository;
 import com.synclyplatform.synclyprojectbackend.repository.PostRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import com.synclyplatform.synclyprojectbackend.mapper.PostCommentMapper;
+import com.synclyplatform.synclyprojectbackend.service.activity.ActivityService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +32,7 @@ public class CommentServiceImpl implements CommentService {
     private final PostCommentRepository postCommentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final ActivityService activityService;
     private final PostCommentMapper postCommentMapper;
 
     @Override
@@ -77,9 +85,21 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void deleteComment(Long commentId) {
-        if (!postCommentRepository.existsById(commentId)) {
-            throw new EntityNotFoundException("Comment not found");
+    @Transactional
+    public void deleteComment(User user, Long commentId) {
+        PostComment foundComment = postCommentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+
+        if (!Objects.equals(foundComment.getAuthor().getUserId(), user.getUserId()) && (user.getRole().equals(UserRole.ADMIN) || user.getRole().equals(UserRole.MODERATOR))) {
+            activityService.createActivity(
+                    ActivityRequestDTO.builder()
+                            .target(foundComment.getContent())
+                            .userId(user.getUserId())
+                            .targetId(commentId)
+                            .actionType(ActivityActionType.DELETED)
+                            .targetType(ActivityTargetType.COMMENT)
+                            .build()
+            );
         }
 
         postCommentRepository.deleteById(commentId);

@@ -3,10 +3,17 @@ package com.synclyplatform.synclyprojectbackend.service.user;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserPresenceDTO;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
+import com.synclyplatform.synclyprojectbackend.model.user.UserRole;
 import com.synclyplatform.synclyprojectbackend.model.user.UserStatus;
+import com.synclyplatform.synclyprojectbackend.model.utils.TimestampSortOption;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import com.synclyplatform.synclyprojectbackend.mapper.UserMapper;
+import com.synclyplatform.synclyprojectbackend.utils.Utils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -49,7 +56,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> searchUsers(String query) {
-        return userRepository.searchUserByQuery(query).stream()
+        return userRepository.searchUserByQuery(query.trim()).stream()
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -70,9 +77,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(userMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<UserDTO> getAllUsers(int page, int size, UserRole userRole, UserStatus userStatus, String searchQuery, TimestampSortOption sortOption) {
+        Sort timestampSortOption = Utils.getTimestampSortOption(sortOption, "createdAt");
+        String normalizedSearchQuery = searchQuery == null ? "" : searchQuery.trim();
+        boolean searchEnabled = !normalizedSearchQuery.isBlank();
+
+        Pageable pageable = PageRequest.of(page, size, timestampSortOption);
+        Page<User> users = userRepository.findAllFiltered(userRole, userStatus, searchQuery, searchEnabled, pageable);
+
+        return users.map(userMapper::toDTO);
     }
 }

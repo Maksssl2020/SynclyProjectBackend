@@ -1,22 +1,27 @@
 package com.synclyplatform.synclyprojectbackend.service.post;
 
+import com.synclyplatform.synclyprojectbackend.dto.activity.ActivityRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.post.*;
+import com.synclyplatform.synclyprojectbackend.model.activity.ActivityActionType;
+import com.synclyplatform.synclyprojectbackend.model.activity.ActivityTargetType;
 import com.synclyplatform.synclyprojectbackend.model.post.*;
 import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
-import com.synclyplatform.synclyprojectbackend.model.tag.TagType;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
+import com.synclyplatform.synclyprojectbackend.model.user.UserRole;
 import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
+import com.synclyplatform.synclyprojectbackend.model.utils.TimestampSortOption;
 import com.synclyplatform.synclyprojectbackend.repository.PostRepository;
 import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
+import com.synclyplatform.synclyprojectbackend.service.activity.ActivityService;
 import com.synclyplatform.synclyprojectbackend.service.media.MediaService;
 import com.synclyplatform.synclyprojectbackend.mapper.PostMapper;
 import com.synclyplatform.synclyprojectbackend.service.tag.TagService;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +39,7 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final MediaService mediaService;
     private final TagService tagService;
+    private final ActivityService activityService;
 
     @Override
     @Transactional
@@ -139,19 +145,39 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDTO> getPostsByTag(String tag, int offset, int limit) {
+    public List<PostDTO> getPostsByTag(String tag, int offset, int limit, TimestampSortOption sortOption) {
         Tag foundTag = tagRepository.findByName(tag)
                 .orElseThrow(() -> new EntityNotFoundException("Tag not found"));
 
-        return postRepository.findAllByTagsContaining(foundTag, PageRequest.of(offset, limit)).stream()
+        Sort sort = switch (sortOption) {
+            case RECENT -> Sort.by(Sort.Direction.DESC, "createdAt");
+            case OLDEST -> Sort.by(Sort.Direction.ASC, "createdAt");
+        };
+
+        PageRequest pageable = PageRequest.of(offset, limit, sort);
+
+        return postRepository.findAllByTagsContaining(foundTag, pageable).stream()
                 .map(postMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void deletePost(Long postId) {
+    @Transactional
+    public void deletePost(User user, Long postId) {
         Post foundPost = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        if (!Objects.equals(user.getUserId(), foundPost.getAuthor().getUserId()) && (user.getRole().equals(UserRole.ADMIN) || user.getRole().equals(UserRole.MODERATOR))) {
+            activityService.createActivity(
+                    ActivityRequestDTO.builder()
+                            .actionType(ActivityActionType.DELETED)
+                            .target(String.format("POST_ID_%d", foundPost.getId()))
+                            .targetId(postId)
+                            .userId(user.getUserId())
+                            .targetType(ActivityTargetType.POST)
+                            .build()
+            );
+        }
 
         postRepository.delete(foundPost);
     }

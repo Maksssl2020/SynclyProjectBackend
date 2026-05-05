@@ -18,10 +18,11 @@ public class ActivityDTO {
 
     private Long id;
     private Long userId;
-    private ActivityActionType actionType;
-    private String userUsername;
-    private UserRole userRole;
+    private Long targetId;
     private String target;
     private String timestamp;
+    private String userUsername;
+    private UserRole userRole;
     private ActivityTargetType targetType;
+    private ActivityActionType actionType;
 }

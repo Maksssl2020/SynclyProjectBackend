@@ -4,11 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.synclyplatform.synclyprojectbackend.dto.media.MediaRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.post.*;
+import com.synclyplatform.synclyprojectbackend.model.user.User;
+import com.synclyplatform.synclyprojectbackend.model.utils.TimestampSortOption;
 import com.synclyplatform.synclyprojectbackend.service.post.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -78,9 +81,10 @@ public class PostController {
     public ResponseEntity<List<PostDTO>> getAllPostsByTag(
             @RequestParam("tag") String tag,
             @RequestParam("offset") int offset,
-            @RequestParam("limit") int limit
+            @RequestParam("limit") int limit,
+            @RequestParam("sortOption") TimestampSortOption sortOption
     ) {
-        return new ResponseEntity<>(postService.getPostsByTag(tag, offset, limit), HttpStatus.OK);
+        return new ResponseEntity<>(postService.getPostsByTag(tag, offset, limit, sortOption), HttpStatus.OK);
     }
 
     @PostMapping(value = "/create/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -139,8 +143,8 @@ public class PostController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<HttpStatus> deletePost(@RequestParam("postId")  Long postId) {
-        postService.deletePost(postId);
+    public ResponseEntity<HttpStatus> deletePost(@AuthenticationPrincipal User user, @RequestParam("postId") Long postId) {
+        postService.deletePost(user, postId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

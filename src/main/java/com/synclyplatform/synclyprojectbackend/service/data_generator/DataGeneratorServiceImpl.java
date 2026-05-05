@@ -3,6 +3,7 @@ package com.synclyplatform.synclyprojectbackend.service.data_generator;
 import com.synclyplatform.synclyprojectbackend.dto.media.MediaRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.media.MediaType;
 import com.synclyplatform.synclyprojectbackend.dto.post.*;
+import com.synclyplatform.synclyprojectbackend.dto.tag.TagDTO;
 import com.synclyplatform.synclyprojectbackend.model.post_collection.PostCollection;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.model.user.UserRole;
@@ -161,7 +162,6 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
         List<Long> allUserIds = userRepository.findAllUserIds();
         Long randomUserId = allUserIds.get(random.nextInt(allUserIds.size()));
         PostRequestDTO postRequestDTO = getRandomPost();
-
         postService.save(randomUserId, postRequestDTO);
     }
 
@@ -343,9 +343,25 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
     }
 
     private Set<String> randomTags(List<String> tags) {
-        return Set.of(
+        int additionalTagsFromBackendNumber = random.nextInt(6) + 1;
+        List<String> list = tagService.findAllTags().stream()
+                .map(TagDTO::getName)
+                .toList();
+
+        Set<String> randomTags = new HashSet<>(Set.of(
                 randomTag(tags),
                 randomTag(tags)
-        );
+        ));
+
+        while (randomTags.size() < randomTags.size() + additionalTagsFromBackendNumber) {
+            String tagToAdd = list.get(random.nextInt(list.size()));
+
+            if (randomTags.contains(tagToAdd))
+                continue;
+
+            randomTags.add(tagToAdd);
+        }
+
+        return randomTags;
     }
 }

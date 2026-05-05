@@ -8,14 +8,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MainTagRequestDTO {
+public class AdminTagRequestDTO {
 
     @NotBlank(message = "Name cannot be empty.")
     private String name;
-
-    @NotBlank(message = "Description cannot be empty.")
-    private String description;
-    private boolean trending;
 
     @NotBlank(message = "Color cannot be blank.")
     private String color;

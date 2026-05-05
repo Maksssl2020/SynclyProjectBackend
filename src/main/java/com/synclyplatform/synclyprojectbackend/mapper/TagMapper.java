@@ -21,13 +21,12 @@ public class TagMapper {
         return TagDTO.builder()
                 .id(tag.getId())
                 .name(tag.getName())
-                .description(tag.getDescription())
                 .trending(tag.isTrending())
                 .postsCount(postsCount)
                 .followersCount(followersCount)
                 .type(tag.getType().toString())
                 .tagCategory(tag.getTagCategory().getName())
-                .color(tag.getColor())
+                .color(tag.getTagCategory().getColor())
                 .createdAt(tag.getCreatedAt().toString())
                 .build();
     }

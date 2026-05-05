@@ -1,15 +1,14 @@
 package com.synclyplatform.synclyprojectbackend.controller;
 
-import com.synclyplatform.synclyprojectbackend.dto.tag.CommonTagRequestDTO;
-import com.synclyplatform.synclyprojectbackend.dto.tag.MainTagRequestDTO;
-import com.synclyplatform.synclyprojectbackend.dto.tag.TagDTO;
-import com.synclyplatform.synclyprojectbackend.dto.tag.TagUsageDTO;
+import com.synclyplatform.synclyprojectbackend.dto.tag.*;
+import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.service.tag.TagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +19,6 @@ import java.util.List;
 public class TagController {
 
     private final TagService tagService;
-
 
     @GetMapping
     public ResponseEntity<List<TagDTO>> getAllTags() {
@@ -68,13 +66,20 @@ public class TagController {
 
     @PostMapping("/create/main")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<HttpStatus> createMain(@RequestBody MainTagRequestDTO mainTagRequest) {
-        tagService.saveMainTag(mainTagRequest);
+    public ResponseEntity<HttpStatus> createMain(@AuthenticationPrincipal User adminUser, @RequestBody AdminTagRequestDTO mainTagRequest) {
+        tagService.saveMainTag(adminUser, mainTagRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping("/create/common")
     public ResponseEntity<TagDTO> createCommon(@RequestBody CommonTagRequestDTO commonTagRequest) {
         return new ResponseEntity<>(tagService.saveCommonTag(commonTagRequest), HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/change/category")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MODERATOR')")
+    public ResponseEntity<HttpStatus> changeTagCategory(@AuthenticationPrincipal User adminUser, @RequestBody ChangeTagCategoryRequestDTO changeTagCategoryRequestDTO) {
+        tagService.changeTagCategory(adminUser, changeTagCategoryRequestDTO);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

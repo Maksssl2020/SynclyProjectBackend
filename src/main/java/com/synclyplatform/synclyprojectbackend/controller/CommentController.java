@@ -4,11 +4,13 @@ import com.synclyplatform.synclyprojectbackend.dto.comment.PostCommentDTO;
 import com.synclyplatform.synclyprojectbackend.dto.comment.PostCommentReplyRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.comment.PostCommentRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.comment.UpdateCommentRequestDTO;
+import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.service.comment.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,8 +46,8 @@ public class CommentController {
     }
 
     @DeleteMapping("/delete-comment")
-    public ResponseEntity<HttpStatus> deleteComment(@RequestParam("commentId") Long commentId) {
-        commentService.deleteComment(commentId);
+    public ResponseEntity<HttpStatus> deleteComment(@AuthenticationPrincipal User user, @RequestParam("commentId") Long commentId) {
+        commentService.deleteComment(user, commentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

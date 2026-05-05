@@ -22,4 +22,5 @@ public class ReportDTO {
     private String resolvedAt;
     private String reportStatus;
     private String reportReasonType;
+    private ReportType reportType;
 }

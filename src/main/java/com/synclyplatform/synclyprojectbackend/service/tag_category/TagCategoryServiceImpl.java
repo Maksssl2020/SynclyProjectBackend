@@ -1,10 +1,16 @@
 package com.synclyplatform.synclyprojectbackend.service.tag_category;
 
+import com.synclyplatform.synclyprojectbackend.dto.activity.ActivityRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.tag_category.TagCategoryDTO;
 import com.synclyplatform.synclyprojectbackend.dto.tag_category.TagCategoryRequestDTO;
+import com.synclyplatform.synclyprojectbackend.model.activity.ActivityActionType;
+import com.synclyplatform.synclyprojectbackend.model.activity.ActivityTargetType;
 import com.synclyplatform.synclyprojectbackend.model.tag_category.TagCategory;
+import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.repository.TagCategoryRepository;
 import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
+import com.synclyplatform.synclyprojectbackend.service.activity.ActivityService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +21,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TagCategoryServiceImpl implements TagCategoryService {
 
-    private final TagCategoryRepository tagCategoryRepository;
     private final TagRepository tagRepository;
+    private final TagCategoryRepository tagCategoryRepository;
+    private final ActivityService activityService;
 
     @Override
-    public void save(TagCategoryRequestDTO tagCategoryRequestDTO) {
+    @Transactional
+    public void save(User adminUser, TagCategoryRequestDTO tagCategoryRequestDTO) {
         if (!tagCategoryExists(tagCategoryRequestDTO.getName())) {
             TagCategory tagCategory = TagCategory.builder()
                     .name(tagCategoryRequestDTO.getName())
@@ -28,6 +36,16 @@ public class TagCategoryServiceImpl implements TagCategoryService {
                     .build();
 
             tagCategoryRepository.save(tagCategory);
+
+            activityService.createActivity(
+                    ActivityRequestDTO.builder()
+                            .userId(adminUser.getUserId())
+                            .targetId(tagCategory.getId())
+                            .targetType(ActivityTargetType.TAG_CATEGORY)
+                            .actionType(ActivityActionType.CREATED)
+                            .target(tagCategory.getName())
+                            .build()
+            );
         }
     }
 

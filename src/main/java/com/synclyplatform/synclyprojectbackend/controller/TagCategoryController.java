@@ -2,11 +2,13 @@ package com.synclyplatform.synclyprojectbackend.controller;
 
 import com.synclyplatform.synclyprojectbackend.dto.tag_category.TagCategoryDTO;
 import com.synclyplatform.synclyprojectbackend.dto.tag_category.TagCategoryRequestDTO;
+import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.service.tag_category.TagCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,8 +37,8 @@ public class TagCategoryController {
 
     @PostMapping("/create")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<HttpStatus> create(@RequestBody TagCategoryRequestDTO tagCategoryRequest) {
-        tagCategoryService.save(tagCategoryRequest);
+    public ResponseEntity<HttpStatus> create(@AuthenticationPrincipal User adminUser, @RequestBody TagCategoryRequestDTO tagCategoryRequest) {
+        tagCategoryService.save(adminUser, tagCategoryRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

@@ -21,13 +21,14 @@ public class Activity {
     @Enumerated(EnumType.STRING)
     private ActivityActionType actionType;
 
+    @Enumerated(EnumType.STRING)
+    private ActivityTargetType targetType;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    private Long targetId;
     private String target;
     private LocalDateTime timestamp;
-
-    @Enumerated(EnumType.STRING)
-    private ActivityTargetType targetType;
 }

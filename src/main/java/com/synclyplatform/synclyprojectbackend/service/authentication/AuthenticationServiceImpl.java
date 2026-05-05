@@ -26,6 +26,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -51,6 +52,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private static final String VERIFY_TURNSTILE_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
     @Override
+    @Transactional
     public void register(RegisterRequestDTO registerRequest) throws Exception {
         validateRegisterRequest(registerRequest);
 
@@ -96,7 +98,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setUserSettings(userSettings);
 
         userRepository.save(user);
-        postCollectionRepository.save(postCollection);
     }
 
     private void validateRegisterRequest(RegisterRequestDTO registerRequest) {
@@ -120,7 +121,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = (User) authentication.getPrincipal();
         user.setStatus(UserStatus.ONLINE);
 
-        boolean isTwoFactorAuthentication = user.getUserSettings().isTwoFactorAuthentication();
+        boolean isTwoFactorAuthentication = user.getUserSettings().isTwoFactorAuthentication() || user.getRole().equals(UserRole.ADMIN);
 
         if (isTwoFactorAuthentication) {
             twoFactorCodeService.generateTwoFactorCode(user.getUserId(), user.getEmail());

@@ -3,11 +3,16 @@ package com.synclyplatform.synclyprojectbackend.mapper;
 import com.synclyplatform.synclyprojectbackend.dto.report.CommentReportDTO;
 import com.synclyplatform.synclyprojectbackend.dto.report.PostReportDTO;
 import com.synclyplatform.synclyprojectbackend.dto.report.ReportDTO;
+import com.synclyplatform.synclyprojectbackend.dto.report.ReportType;
+import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
 import com.synclyplatform.synclyprojectbackend.model.report.CommentReport;
 import com.synclyplatform.synclyprojectbackend.model.report.PostReport;
 import com.synclyplatform.synclyprojectbackend.model.report.Report;
+import com.synclyplatform.synclyprojectbackend.model.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -33,12 +38,13 @@ public class ReportMapper {
                 .reason(postReport.getReason())
                 .title(postReport.getTitle())
                 .reportedBy(userMapper.toDTO(postReport.getReportedBy()))
-                .resolvedBy(postReport.getResolvedBy() != null ? userMapper.toDTO(postReport.getResolvedBy()) : null)
-                .reportedAt(postReport.getReportedAt().toString())
-                .resolvedAt(postReport.getResolvedAt() != null ? postReport.getReportedAt().toString() : null)
+                .resolvedBy(getResolvedByOrNull(postReport.getResolvedBy()))
+                .reportedAt(getDateOrNull(postReport.getReportedAt()))
+                .resolvedAt(getDateOrNull(postReport.getResolvedAt()))
                 .post(postMapper.toDto(postReport.getPost()))
                 .reportStatus(postReport.getReportStatus().name())
                 .reportReasonType(postReport.getReportReasonType().name())
+                .reportType(ReportType.POST)
                 .build();
     }
     public CommentReportDTO toCommentReportDTO(CommentReport commentReport) {
@@ -48,12 +54,29 @@ public class ReportMapper {
                 .reason(commentReport.getReason())
                 .title(commentReport.getTitle())
                 .reportedBy(userMapper.toDTO(commentReport.getReportedBy()))
-                .resolvedBy(commentReport.getResolvedBy() != null ? userMapper.toDTO(commentReport.getResolvedBy()) : null)
-                .reportedAt(commentReport.getResolvedAt() != null ? commentReport.getReportedAt().toString() : null)
-                .resolvedAt(commentReport.getResolvedAt().toString())
+                .resolvedBy(getResolvedByOrNull(commentReport.getResolvedBy()))
+                .reportedAt(getDateOrNull(commentReport.getReportedAt()))
+                .resolvedAt(getDateOrNull(commentReport.getResolvedAt()))
                 .comment(postCommentMapper.toDTO(commentReport.getComment()))
                 .reportStatus(commentReport.getReportStatus().name())
                 .reportReasonType(commentReport.getReportReasonType().name())
+                .reportType(ReportType.COMMENT)
                 .build();
+    }
+
+    private String getDateOrNull(LocalDateTime date) {
+        if (date == null) {
+            return null;
+        } else {
+            return date.toString();
+        }
+    }
+
+    private UserDTO getResolvedByOrNull(User user) {
+        if (user == null) {
+            return null;
+        } else {
+            return userMapper.toDTO(user);
+        }
     }
 }

@@ -2,9 +2,15 @@ package com.synclyplatform.synclyprojectbackend.controller;
 
 import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserPresenceDTO;
+import com.synclyplatform.synclyprojectbackend.model.activity.ActivityActionType;
+import com.synclyplatform.synclyprojectbackend.model.activity.ActivityTargetType;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
+import com.synclyplatform.synclyprojectbackend.model.user.UserRole;
+import com.synclyplatform.synclyprojectbackend.model.user.UserStatus;
+import com.synclyplatform.synclyprojectbackend.model.utils.TimestampSortOption;
 import com.synclyplatform.synclyprojectbackend.service.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -24,8 +30,15 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+    public ResponseEntity<Page<UserDTO>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) UserRole userRole,
+            @RequestParam(required = false) UserStatus userStatus,
+            @RequestParam(required = false, defaultValue = "RECENT") TimestampSortOption sortOption,
+            @RequestParam(required = false) String searchQuery
+    ) {
+        return new ResponseEntity<>(userService.getAllUsers(page, size, userRole, userStatus, searchQuery, sortOption), HttpStatus.OK);
     }
 
     @MessageMapping("/user.disconnectUser")

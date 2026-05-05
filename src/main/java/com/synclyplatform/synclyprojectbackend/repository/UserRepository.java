@@ -4,6 +4,8 @@ import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.model.user.UserRole;
 import com.synclyplatform.synclyprojectbackend.model.user.UserStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -46,9 +48,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
             (
                 LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR
                 LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR
-                LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%'))
+                LOWER(u.lastName) LIKE LOWER(CONCAT('%', :query, '%')) OR
+                LOWER(CONCAT(u.firstName, ' ', u.lastName)) LIKE LOWER(CONCAT('%', :query, '%')) OR
+                LOWER(CONCAT(u.lastName, ' ', u.firstName)) LIKE LOWER(CONCAT('%', :query, '%'))
             )
-                AND u.role <> 'ADMIN'
+            AND u.role <> 'ADMIN'
     """)
     List<User> searchUserByQuery(@Param("query") String query);
 
@@ -79,4 +83,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("excludedIds") Collection<Long> excludedIds,
             @Param("limit") int limit
     );
+
+    @Query("""
+        SELECT u FROM User u
+        WHERE (:userRole IS NULL OR u.role = :userRole)
+        AND (:userStatus IS NULL OR u.status = :userStatus)
+        AND (
+                :searchEnabled = FALSE OR
+                LOWER(u.username) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
+                LOWER(u.email) LIKE LOWER(CONCAT('%', :searchQuery, '%'))
+            )
+    """)
+    Page<User> findAllFiltered(UserRole userRole, UserStatus userStatus, String searchQuery, boolean searchEnabled, Pageable pageable);
 }

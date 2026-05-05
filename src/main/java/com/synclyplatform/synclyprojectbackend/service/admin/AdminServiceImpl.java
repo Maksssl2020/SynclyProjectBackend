@@ -1,7 +1,10 @@
 package com.synclyplatform.synclyprojectbackend.service.admin;
 
+import com.synclyplatform.synclyprojectbackend.dto.activity.ActivityRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.admin.AdminPanelStatisticsDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user.UpdateUserDataAsAdminRequestDTO;
+import com.synclyplatform.synclyprojectbackend.model.activity.ActivityActionType;
+import com.synclyplatform.synclyprojectbackend.model.activity.ActivityTargetType;
 import com.synclyplatform.synclyprojectbackend.model.report.ReportStatus;
 import com.synclyplatform.synclyprojectbackend.model.tag.TagType;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
@@ -11,7 +14,9 @@ import com.synclyplatform.synclyprojectbackend.repository.PostRepository;
 import com.synclyplatform.synclyprojectbackend.repository.ReportRepository;
 import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
+import com.synclyplatform.synclyprojectbackend.service.activity.ActivityService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +31,7 @@ public class AdminServiceImpl implements AdminService {
     private final TagRepository tagRepository;
     private final ReportRepository reportRepository;
     private final PostRepository postRepository;
+    private final ActivityService activityService;
 
     @Override
     public AdminPanelStatisticsDTO getAdminStatistics() {
@@ -80,20 +86,40 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void updateUserAsAdmin(Long userId, UpdateUserDataAsAdminRequestDTO updateUserDataAsAdminRequestDTO) {
+    @Transactional
+    public void updateUserAsAdmin(Long userId, User adminUser, UpdateUserDataAsAdminRequestDTO updateUserDataAsAdminRequestDTO) {
         User foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User with id " + userId + " not found"));
 
         if (updateUserDataAsAdminRequestDTO.getBio() != null) {
             foundUser.getUserProfile().setBio(updateUserDataAsAdminRequestDTO.getBio());
+            createUserActivity(adminUser, foundUser, ActivityActionType.UPDATED);
         }
+
         if (updateUserDataAsAdminRequestDTO.getUserStatus() != null && updateUserDataAsAdminRequestDTO.getUserStatus().equals(UserStatus.BLOCKED)) {
             foundUser.setAccountNonLocked(false);
+            createUserActivity(adminUser, foundUser, ActivityActionType.BLOCKED);
         }
+
         if (updateUserDataAsAdminRequestDTO.getUserRole() != null) {
             foundUser.setRole(updateUserDataAsAdminRequestDTO.getUserRole());
+            createUserActivity(adminUser, foundUser, ActivityActionType.PROMOTED);
         }
 
         userRepository.save(foundUser);
+    }
+
+    private void createUserActivity(
+            User adminUser,
+            User targetUser,
+            ActivityActionType actionType
+    ) {
+        activityService.createActivity(ActivityRequestDTO.builder()
+                .userId(adminUser.getUserId())
+                .targetId(targetUser.getUserId())
+                .target(targetUser.getUsername())
+                .actionType(actionType)
+                .targetType(ActivityTargetType.USER)
+                .build());
     }
 }

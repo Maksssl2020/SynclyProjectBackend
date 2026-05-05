@@ -1,10 +1,8 @@
 package com.synclyplatform.synclyprojectbackend.service.tag;
 
-import com.synclyplatform.synclyprojectbackend.dto.tag.CommonTagRequestDTO;
-import com.synclyplatform.synclyprojectbackend.dto.tag.MainTagRequestDTO;
-import com.synclyplatform.synclyprojectbackend.dto.tag.TagDTO;
-import com.synclyplatform.synclyprojectbackend.dto.tag.TagUsageDTO;
+import com.synclyplatform.synclyprojectbackend.dto.tag.*;
 import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
+import com.synclyplatform.synclyprojectbackend.model.user.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,7 +10,7 @@ import java.util.List;
 @Service
 public interface TagService {
 
-    void saveMainTag(MainTagRequestDTO mainTagRequest);
+    void saveMainTag(User adminUser, AdminTagRequestDTO mainTagRequest);
     TagDTO saveCommonTag(CommonTagRequestDTO commonTagRequest);
     Tag saveCommonTag(String tagName);
     TagDTO getTagByName(String tagName);
@@ -22,4 +20,7 @@ public interface TagService {
     List<TagUsageDTO> findTrendingTags(int limit);
     List<TagDTO> searchTags(String query);
     boolean tagExists(String tagName);
+    void updateTrendingTags();
+
+    void changeTagCategory(User adminUser, ChangeTagCategoryRequestDTO changeTagCategoryRequestDTO);
 }

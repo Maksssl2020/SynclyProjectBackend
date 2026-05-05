@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -29,8 +30,9 @@ public class Tag {
     private String name;
 
     private String color;
-    private String description;
-    private boolean trending;
+
+    @Column(nullable = false)
+    private boolean trending = false;
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();

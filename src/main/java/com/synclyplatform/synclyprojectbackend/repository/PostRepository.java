@@ -39,8 +39,15 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     );
 
     @Query("""
-        SELECT p FROM Post p WHERE
-        LOWER(p.author.username) LIKE LOWER(CONCAT('%', :query, '%'))
+        SELECT DISTINCT p FROM Post p
+        LEFT JOIN p.tags t
+        WHERE
+            LOWER(p.author.username) LIKE LOWER(CONCAT('%', :query, '%')) OR
+            LOWER(p.author.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR
+            LOWER(p.author.lastName) LIKE LOWER(CONCAT('%', :query, '%')) OR
+            LOWER(CONCAT(p.author.firstName, ' ', p.author.lastName)) LIKE LOWER(CONCAT('%', :query, '%')) OR
+            LOWER(CONCAT(p.author.lastName, ' ', p.author.firstName)) LIKE LOWER(CONCAT('%', :query, '%')) OR
+            LOWER(t.name) LIKE LOWER(CONCAT('%', :query, '%'))
     """)
     List<Post> searchPostsByQuery(@Param("query") String query);
 

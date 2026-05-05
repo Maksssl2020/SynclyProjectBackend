@@ -12,7 +12,8 @@ import lombok.*;
 public class ActivityRequestDTO {
 
     private Long userId;
-    private ActivityActionType actionType;
+    private Long targetId;
     private String target;
+    private ActivityActionType actionType;
     private ActivityTargetType targetType;
 }

@@ -40,6 +40,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
+    @Transactional
     public UserProfile createUserProfile(UserProfileRequestDTO userProfileRequest) throws Exception {
         User foundUser = userRepository.findById(userProfileRequest.getUserId())
                 .orElseThrow(() -> new Exception("User not found."));
@@ -58,6 +59,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
+    @Transactional
     public void updateUserProfile(Long userId, UserProfileUpdateRequestDTO userProfileUpdateRequest) throws Exception {
         User foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new Exception("User Not Found."));
