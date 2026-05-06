@@ -19,8 +19,15 @@ public interface TagService {
     List<TagUsageDTO> findPopularTags(int limit);
     List<TagUsageDTO> findTrendingTags(int limit);
     List<TagDTO> searchTags(String query);
+    List<TagDTO> findAllEnabledTags();
     boolean tagExists(String tagName);
     void updateTrendingTags();
 
-    void changeTagCategory(User adminUser, ChangeTagCategoryRequestDTO changeTagCategoryRequestDTO);
+    void changeTagCategory(User adminUser, ChangeTagCategoryRequestDTO changeTagCategoryRequestDTO, boolean createActivity);
+
+    TagToEditDTO getTagToEditById(Long tagId);
+
+    void updateTag(User adminUser, TagUpdateRequestDTO tagUpdateRequestDTO);
+
+    void disableEnableTagById(User adminUser, Long tagId);
 }

@@ -20,12 +20,14 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     Long countByTagCategoryName(String tagCategoryName);
     Long countByName(String tagName);
 
+    List<Tag> findAllByEnabledIsTrue();
+
     @Query("""
         SELECT t.name FROM Tag t
     """)
     List<String> findOnlyTagNames();
 
-    List<Tag> findAllByTagCategoryName(String tagCategoryName);
+    List<Tag> findAllByTagCategoryNameAndEnabledIsTrue(String tagCategoryName);
 
     @Query(value = """
         SELECT COUNT(pt.post_id) FROM post_tags pt WHERE tags_id = :tagId
@@ -45,6 +47,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         SELECT t.id, t.name, COUNT(pt.post_id) AS usageCount
         FROM post_tags pt
         JOIN tag t ON pt.tags_id = t.id
+        WHERE t.enabled IS TRUE
         GROUP BY t.id, t.name
         ORDER BY usageCount DESC
         LIMIT :limit
@@ -57,6 +60,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         JOIN post p ON pt.post_id = p.id
         JOIN tag t ON pt.tags_id = t.id
         WHERE p.created_at > CURRENT_DATE - 7
+            AND t.enabled IS TRUE
         GROUP BY t.id, t.name
         ORDER BY usageCount DESC
         LIMIT :limit
@@ -103,9 +107,10 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
         SELECT t FROM Tag t
         LEFT JOIN t.tagCategory tc
         WHERE
-            LOWER(t.name) LIKE LOWER(CONCAT('%', :query, '%')) OR
+            (LOWER(t.name) LIKE LOWER(CONCAT('%', :query, '%')) OR
             LOWER(CAST(t.type AS string)) LIKE LOWER(CONCAT('%', :query, '%')) OR
-            LOWER(tc.name) LIKE LOWER(CONCAT('%', :query, '%'))
+            LOWER(tc.name) LIKE LOWER(CONCAT('%', :query, '%'))) AND
+            t.enabled IS TRUE
     """)
     List<Tag> searchTagByQuery(@Param("query") String query);
 

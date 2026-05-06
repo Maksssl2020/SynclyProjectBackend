@@ -86,7 +86,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .user(user)
                 .build();
 
-
         if (user.getPostCollections() == null) {
             user.setPostCollections(new ArrayList<>());
             user.getPostCollections().add(postCollection);
@@ -121,7 +120,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = (User) authentication.getPrincipal();
         user.setStatus(UserStatus.ONLINE);
 
-        boolean isTwoFactorAuthentication = user.getUserSettings().isTwoFactorAuthentication() || user.getRole().equals(UserRole.ADMIN);
+        boolean isTwoFactorAuthentication = user.getUserSettings().isTwoFactorAuthentication() || user.getRole().equals(UserRole.ADMIN) || user.getRole().equals(UserRole.MODERATOR);
 
         if (isTwoFactorAuthentication) {
             twoFactorCodeService.generateTwoFactorCode(user.getUserId(), user.getEmail());

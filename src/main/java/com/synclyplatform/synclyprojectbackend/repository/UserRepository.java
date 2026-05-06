@@ -1,5 +1,6 @@
 package com.synclyplatform.synclyprojectbackend.repository;
 
+import com.synclyplatform.synclyprojectbackend.dto.user.AdminUserDTO;
 import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.model.user.UserRole;
@@ -95,4 +96,107 @@ public interface UserRepository extends JpaRepository<User, Long> {
             )
     """)
     Page<User> findAllFiltered(UserRole userRole, UserStatus userStatus, String searchQuery, boolean searchEnabled, Pageable pageable);
+
+    @Query("""
+        SELECT u
+        FROM User u
+        WHERE (:userRole IS NULL OR u.role = :userRole)
+        AND (:userStatus IS NULL OR u.status = :userStatus)
+        AND (
+            :searchEnabled = FALSE OR
+            LOWER(u.username) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
+            LOWER(u.email) LIKE LOWER(CONCAT('%', :searchQuery, '%'))
+        )
+    """)
+    Page<User> findAllFilteredForAdmin(
+            UserRole userRole,
+            UserStatus userStatus,
+            String searchQuery,
+            boolean searchEnabled,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT u
+        FROM User u
+        LEFT JOIN Post p ON p.author = u
+        WHERE (:userRole IS NULL OR u.role = :userRole)
+        AND (:userStatus IS NULL OR u.status = :userStatus)
+        AND (
+            :searchEnabled = FALSE OR
+            LOWER(u.username) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
+            LOWER(u.email) LIKE LOWER(CONCAT('%', :searchQuery, '%'))
+        )
+        ORDER BY COUNT (DISTINCT p.id) ASC
+    """)
+    Page<User> findAllFilteredForAdminAndSortedByPostCountAsc(
+            UserRole userRole,
+            UserStatus userStatus,
+            String searchQuery,
+            boolean searchEnabled,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT u
+        FROM User u
+        LEFT JOIN Post p ON p.author = u
+        WHERE (:userRole IS NULL OR u.role = :userRole)
+        AND (:userStatus IS NULL OR u.status = :userStatus)
+        AND (
+            :searchEnabled = FALSE OR
+            LOWER(u.username) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
+            LOWER(u.email) LIKE LOWER(CONCAT('%', :searchQuery, '%'))
+        )
+        ORDER BY COUNT (DISTINCT p.id) DESC
+    """)
+    Page<User> findAllFilteredForAdminAndSortedByPostCountDesc(
+            UserRole userRole,
+            UserStatus userStatus,
+            String searchQuery,
+            boolean searchEnabled,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT u
+        FROM User u
+        LEFT JOIN UserProfile up ON up.user = u
+        WHERE (:userRole IS NULL OR u.role = :userRole)
+        AND (:userStatus IS NULL OR u.status = :userStatus)
+        AND (
+            :searchEnabled = FALSE OR
+            LOWER(u.username) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
+            LOWER(u.email) LIKE LOWER(CONCAT('%', :searchQuery, '%'))
+        )
+        ORDER BY SIZE(up.followers) ASC
+    """)
+    Page<User> findAllFilteredForAdminAndSortedByFollowersCountAsc(
+            UserRole userRole,
+            UserStatus userStatus,
+            String searchQuery,
+            boolean searchEnabled,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT u
+        FROM User u
+        LEFT JOIN UserProfile up ON up.user = u
+        WHERE (:userRole IS NULL OR u.role = :userRole)
+        AND (:userStatus IS NULL OR u.status = :userStatus)
+        AND (
+            :searchEnabled = FALSE OR
+            LOWER(u.username) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
+            LOWER(u.email) LIKE LOWER(CONCAT('%', :searchQuery, '%'))
+        )
+        ORDER BY SIZE(up.followers) DESC
+    """)
+    Page<User> findAllFilteredForAdminAndSortedByFollowersCountDesc(
+            UserRole userRole,
+            UserStatus userStatus,
+            String searchQuery,
+            boolean searchEnabled,
+            Pageable pageable
+    );
 }

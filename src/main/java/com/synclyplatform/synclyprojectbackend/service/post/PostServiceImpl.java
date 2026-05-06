@@ -113,7 +113,7 @@ public class PostServiceImpl implements PostService {
         if (minId == null || maxId == null) return List.of();
 
         Long randomStartId = ThreadLocalRandom.current().nextLong(minId, maxId + 1);
-        Pageable pageable = PageRequest.of(offset, limit);
+        Pageable pageable = PageRequest.of(offset, limit, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         List<Post> posts = postRepository.findRandomPostsFromId(userId, randomStartId, pageable);
 
@@ -137,7 +137,7 @@ public class PostServiceImpl implements PostService {
             return Collections.emptyList();
         }
 
-        return postRepository.findPostsByAuthorsOrTags(followedUsersIds, followedTagsIds, PageRequest.of(offset, limit))
+        return postRepository.findPostsByAuthorsOrTags(followedUsersIds, followedTagsIds, PageRequest.of(offset, limit, Sort.by(Sort.Direction.DESC, "createdAt")))
                 .stream()
                 .filter(post -> !Objects.equals(post.getAuthor().getUserId(), userId))
                 .map(postMapper::toDto)

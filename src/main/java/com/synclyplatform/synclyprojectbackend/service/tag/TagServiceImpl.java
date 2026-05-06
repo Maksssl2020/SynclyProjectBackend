@@ -42,6 +42,7 @@ public class TagServiceImpl implements TagService {
                     .tagCategory(tagCategory)
                     .color(mainTagRequest.getColor())
                     .type(TagType.MAIN)
+                    .enabled(true)
                     .build();
 
             tagRepository.save(tag);
@@ -78,6 +79,7 @@ public class TagServiceImpl implements TagService {
                     .type(TagType.COMMON)
                     .color("#8b5cf6")
                     .tagCategory(common)
+                    .enabled(true)
                     .build();
 
             return tagRepository.save(tag);
@@ -107,8 +109,15 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    public List<TagDTO> findAllEnabledTags() {
+        return tagRepository.findAllByEnabledIsTrue().stream()
+                .map(tagMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<TagDTO> findRelatedTagsByCategory(String category) {
-        return tagRepository.findAllByTagCategoryName(category).stream()
+        return tagRepository.findAllByTagCategoryNameAndEnabledIsTrue(category).stream()
                 .map(tagMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -149,7 +158,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
-    public void changeTagCategory(User adminUser, ChangeTagCategoryRequestDTO changeTagCategoryRequestDTO) {
+    public void changeTagCategory(User adminUser, ChangeTagCategoryRequestDTO changeTagCategoryRequestDTO, boolean createActivity) {
         Tag foundTag = tagRepository.findById(changeTagCategoryRequestDTO.getTagId())
                 .orElseThrow(() -> new EntityNotFoundException("Tag not found."));
 
@@ -162,16 +171,88 @@ public class TagServiceImpl implements TagService {
 
         foundTag.setTagCategory(foundTagCategory);
 
+        if (createActivity) {
+            activityService.createActivity(
+                    ActivityRequestDTO.builder()
+                            .target(foundTag.getName())
+                            .userId(adminUser.getUserId())
+                            .targetId(foundTag.getId())
+                            .targetType(ActivityTargetType.TAG)
+                            .actionType(ActivityActionType.CHANGED_CATEGORY)
+                            .build()
+            );
+        }
+
+        tagRepository.save(foundTag);
+    }
+
+    @Override
+    public TagToEditDTO getTagToEditById(Long tagId) {
+        Tag foundTag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new EntityNotFoundException("Tag not found."));
+
+        return tagMapper.toTagToEditDTO(foundTag);
+    }
+
+    @Override
+    @Transactional
+    public void updateTag(User adminUser, TagUpdateRequestDTO tagUpdateRequestDTO) {
+        Tag foundTag = tagRepository.findById(tagUpdateRequestDTO.getTagId())
+                .orElseThrow(() -> new EntityNotFoundException("Tag not found."));
+        boolean createUpdateActivity = false;
+
+        if (tagUpdateRequestDTO.getTagName() != null) {
+            foundTag.setName(tagUpdateRequestDTO.getTagName());
+            createUpdateActivity = true;
+        }
+
+        if (tagUpdateRequestDTO.getColor() != null) {
+            foundTag.setColor(tagUpdateRequestDTO.getColor());
+            createUpdateActivity = true;
+        }
+
+        if (tagUpdateRequestDTO.getTagCategoryId() != null) {
+            ChangeTagCategoryRequestDTO changeTagCategoryRequestDTO = ChangeTagCategoryRequestDTO.builder()
+                    .tagId(foundTag.getId())
+                    .categoryId(tagUpdateRequestDTO.getTagCategoryId())
+                    .build();
+
+            changeTagCategory(adminUser, changeTagCategoryRequestDTO, false);
+            createUpdateActivity = true;
+        }
+
+        if (createUpdateActivity) {
+            activityService.createActivity(
+                    ActivityRequestDTO.builder()
+                            .target(foundTag.getName())
+                            .userId(adminUser.getUserId())
+                            .targetId(foundTag.getId())
+                            .targetType(ActivityTargetType.TAG)
+                            .actionType(ActivityActionType.UPDATED)
+                            .build()
+            );
+        }
+
+        tagRepository.save(foundTag);
+    }
+
+    @Override
+    @Transactional
+    public void disableEnableTagById(User adminUser, Long tagId) {
+        Tag foundTag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new EntityNotFoundException("Tag not found."));
+        boolean disabledTag = foundTag.isEnabled();
+
+        foundTag.setEnabled(!foundTag.isEnabled());
+
         activityService.createActivity(
                 ActivityRequestDTO.builder()
                         .target(foundTag.getName())
                         .userId(adminUser.getUserId())
                         .targetId(foundTag.getId())
                         .targetType(ActivityTargetType.TAG)
-                        .actionType(ActivityActionType.CHANGED_CATEGORY)
+                        .actionType(disabledTag ? ActivityActionType.DISABLED : ActivityActionType.ENABLED)
                         .build()
         );
-
-        tagRepository.save(foundTag);
     }
 }

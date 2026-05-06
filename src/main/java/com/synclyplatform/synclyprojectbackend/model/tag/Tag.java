@@ -43,4 +43,7 @@ public class Tag {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_category_id")
     private TagCategory tagCategory;
+
+    @Column(nullable = false)
+    private boolean enabled = true;
 }

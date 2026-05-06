@@ -1,5 +1,6 @@
 package com.synclyplatform.synclyprojectbackend.controller;
 
+import com.synclyplatform.synclyprojectbackend.dto.user.AdminUserDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserPresenceDTO;
 import com.synclyplatform.synclyprojectbackend.model.activity.ActivityActionType;
@@ -30,15 +31,16 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<Page<UserDTO>> getAllUsers(
+    public ResponseEntity<Page<AdminUserDTO>> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) UserRole userRole,
             @RequestParam(required = false) UserStatus userStatus,
-            @RequestParam(required = false, defaultValue = "RECENT") TimestampSortOption sortOption,
+            @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String sortDirection,
             @RequestParam(required = false) String searchQuery
     ) {
-        return new ResponseEntity<>(userService.getAllUsers(page, size, userRole, userStatus, searchQuery, sortOption), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getAllUsers(page, size, userRole, userStatus, searchQuery, sortBy, sortDirection), HttpStatus.OK);
     }
 
     @MessageMapping("/user.disconnectUser")

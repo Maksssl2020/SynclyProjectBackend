@@ -79,6 +79,7 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
                 .lastActive(LocalDateTime.now())
                 .role(UserRole.REGISTERED)
                 .status(UserStatus.OFFLINE)
+                .accountNonLocked(true)
                 .build();
 
         userRepository.save(user);
@@ -344,6 +345,7 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
 
     private Set<String> randomTags(List<String> tags) {
         int additionalTagsFromBackendNumber = random.nextInt(6) + 1;
+
         List<String> list = tagService.findAllTags().stream()
                 .map(TagDTO::getName)
                 .toList();
@@ -353,7 +355,9 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
                 randomTag(tags)
         ));
 
-        while (randomTags.size() < randomTags.size() + additionalTagsFromBackendNumber) {
+        int targetSize = randomTags.size() + additionalTagsFromBackendNumber;
+
+        while (randomTags.size() < targetSize) {
             String tagToAdd = list.get(random.nextInt(list.size()));
 
             if (randomTags.contains(tagToAdd))

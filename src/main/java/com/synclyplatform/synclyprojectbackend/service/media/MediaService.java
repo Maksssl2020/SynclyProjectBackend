@@ -15,6 +15,5 @@ public interface MediaService {
     void saveUserAvatar(Long userId, MultipartFile image);
     void savePostPhotos(PhotoPost photoPost, List<MediaRequestDTO> mediaRequestDTOList);
     MultipartFile base64ToMultipartFile(String base64, String fileName);
-
     List<MediaDTO> getPostPhotos(Long postId);
 }

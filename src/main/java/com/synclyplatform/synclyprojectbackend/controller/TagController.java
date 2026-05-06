@@ -21,13 +21,25 @@ public class TagController {
     private final TagService tagService;
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MODERATOR')")
     public ResponseEntity<List<TagDTO>> getAllTags() {
         return ResponseEntity.ok(tagService.findAllTags());
+    }
+
+    @GetMapping("/enabled")
+    public ResponseEntity<List<TagDTO>> getAllEnabledTags() {
+        return ResponseEntity.ok(tagService.findAllEnabledTags());
     }
 
     @GetMapping("/tag/by-name")
     public ResponseEntity<TagDTO> getTagByName(@Param("tagName") String tagName) {
         return new ResponseEntity<>(tagService.getTagByName(tagName), HttpStatus.OK);
+    }
+
+    @GetMapping("/tag/by-id/to-edit")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<TagToEditDTO> getTagToEditById(@RequestParam("tagId") Long tagId) {
+        return new ResponseEntity<>(tagService.getTagToEditById(tagId), HttpStatus.OK);
     }
 
     @GetMapping("/related/by-category")
@@ -79,7 +91,21 @@ public class TagController {
     @PatchMapping("/change/category")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MODERATOR')")
     public ResponseEntity<HttpStatus> changeTagCategory(@AuthenticationPrincipal User adminUser, @RequestBody ChangeTagCategoryRequestDTO changeTagCategoryRequestDTO) {
-        tagService.changeTagCategory(adminUser, changeTagCategoryRequestDTO);
+        tagService.changeTagCategory(adminUser, changeTagCategoryRequestDTO, true);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping("/update")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<HttpStatus> updateTag(@AuthenticationPrincipal User adminUser, @ModelAttribute TagUpdateRequestDTO tagUpdateRequestDTO) {
+        tagService.updateTag(adminUser, tagUpdateRequestDTO);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping("/change-state")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity<HttpStatus> disableEnableTag(@AuthenticationPrincipal User adminUser, @RequestBody Long tagId) {
+        tagService.disableEnableTagById(adminUser, tagId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

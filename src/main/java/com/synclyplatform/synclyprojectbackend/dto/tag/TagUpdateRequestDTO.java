@@ -4,11 +4,11 @@ import lombok.*;
 
 @Setter
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeTagCategoryRequestDTO {
+public class TagUpdateRequestDTO {
 
     private Long tagId;
-    private Long categoryId;
-}
+    private Long tagCategoryId;
+    private String tagName;
+    private String color;}

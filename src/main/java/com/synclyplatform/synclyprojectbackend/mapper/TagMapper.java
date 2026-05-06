@@ -2,6 +2,7 @@ package com.synclyplatform.synclyprojectbackend.mapper;
 
 import com.synclyplatform.synclyprojectbackend.dto.tag.PostTagDTO;
 import com.synclyplatform.synclyprojectbackend.dto.tag.TagDTO;
+import com.synclyplatform.synclyprojectbackend.dto.tag.TagToEditDTO;
 import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
 import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
@@ -34,6 +35,16 @@ public class TagMapper {
     public PostTagDTO toPostTagDTO(Tag tag) {
         return PostTagDTO.builder()
                 .id(tag.getId())
+                .name(tag.getName())
+                .color(tag.getColor())
+                .build();
+    }
+
+    public TagToEditDTO toTagToEditDTO(Tag tag) {
+        return TagToEditDTO.builder()
+                .id(tag.getId())
+                .tagCategoryId(tag.getTagCategory().getId())
+                .tagCategoryName(tag.getTagCategory().getName())
                 .name(tag.getName())
                 .color(tag.getColor())
                 .build();

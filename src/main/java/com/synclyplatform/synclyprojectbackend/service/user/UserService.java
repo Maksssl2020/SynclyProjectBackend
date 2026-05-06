@@ -1,5 +1,6 @@
 package com.synclyplatform.synclyprojectbackend.service.user;
 
+import com.synclyplatform.synclyprojectbackend.dto.user.AdminUserDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserPresenceDTO;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
@@ -20,5 +21,5 @@ public interface UserService {
     List<UserDTO> searchUsers(String query);
     UserPresenceDTO getUserPresenceStatus(Long userId);
 
-    Page<UserDTO> getAllUsers(int page, int size, UserRole userRole, UserStatus userStatus, String searchQuery, TimestampSortOption sortOption);
+    Page<AdminUserDTO> getAllUsers(int page, int size, UserRole userRole, UserStatus userStatus, String searchQuery, String sortBy, String sortDirection);
 }
