@@ -47,6 +47,8 @@ public class BeansConfig {
         final CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOrigin("http://localhost:5173");
+        config.addAllowedOrigin("https://syncly-service.netlify.app");
+        config.addAllowedOrigin("http://syncly-service.netlify.app");
         config.setAllowedHeaders(List.of(
                 HttpHeaders.ORIGIN,
                 HttpHeaders.CONTENT_TYPE,
