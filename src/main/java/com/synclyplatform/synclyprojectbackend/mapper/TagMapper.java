@@ -29,6 +29,7 @@ public class TagMapper {
                 .tagCategory(tag.getTagCategory().getName())
                 .color(tag.getTagCategory().getColor())
                 .createdAt(tag.getCreatedAt().toString())
+                .enabled(tag.isEnabled())
                 .build();
     }
 

@@ -346,7 +346,7 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
     private Set<String> randomTags(List<String> tags) {
         int additionalTagsFromBackendNumber = random.nextInt(6) + 1;
 
-        List<String> list = tagService.findAllTags().stream()
+        List<String> list = tagService.findAllEnabledTags().stream()
                 .map(TagDTO::getName)
                 .toList();
 

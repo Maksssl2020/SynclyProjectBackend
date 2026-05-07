@@ -2,6 +2,7 @@ package com.synclyplatform.synclyprojectbackend.repository;
 
 import com.synclyplatform.synclyprojectbackend.model.tag_category.TagCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,4 +13,9 @@ public interface TagCategoryRepository extends JpaRepository<TagCategory, Long> 
 
     Optional<TagCategory> findByName(String name);
     Long countByName(String name);
+
+    @Query("""
+        SELECT DISTINCT tg.name FROM TagCategory tg
+    """)
+    List<String> getTagCategoriesNames();
 }

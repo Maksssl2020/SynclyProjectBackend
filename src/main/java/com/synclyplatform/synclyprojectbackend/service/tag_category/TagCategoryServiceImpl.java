@@ -55,6 +55,11 @@ public class TagCategoryServiceImpl implements TagCategoryService {
     }
 
     @Override
+    public List<String> getTagsCategoriesNames() {
+        return tagCategoryRepository.getTagCategoriesNames();
+    }
+
+    @Override
     public TagCategoryDTO findById(Long id) {
         TagCategory tagCategory = tagCategoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tag category with id " + id + " doesn't exist"));

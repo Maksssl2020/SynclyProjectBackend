@@ -1,8 +1,12 @@
 package com.synclyplatform.synclyprojectbackend.repository;
 
 import com.synclyplatform.synclyprojectbackend.dto.tag.TagUsageDTO;
+import com.synclyplatform.synclyprojectbackend.model.activity.ActivityActionType;
+import com.synclyplatform.synclyprojectbackend.model.activity.ActivityTargetType;
 import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
 import com.synclyplatform.synclyprojectbackend.model.tag.TagType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,6 +32,26 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     List<String> findOnlyTagNames();
 
     List<Tag> findAllByTagCategoryNameAndEnabledIsTrue(String tagCategoryName);
+
+    @Query("""
+        SELECT t FROM Tag t
+        LEFT JOIN TagCategory tc ON t.tagCategory.id = tc.id
+        WHERE (:tagCategoryName IS NULL OR tc.name = :tagCategoryName)
+          AND (:trendingOnly = FALSE OR t.trending = TRUE)
+          AND (
+              :searchEnabled = false OR
+              LOWER(t.name) LIKE LOWER(CONCAT('%', :searchQuery, '%')) OR
+              LOWER(tc.name) LIKE LOWER(CONCAT('%', :searchQuery, '%'))
+          )
+    """)
+
+    Page<Tag> findAllTagsFiltered(
+            @Param("tagCategoryName") String tagCategoryName,
+            @Param("trendingOnly") boolean trendingOnly,
+            @Param("searchQuery") String searchQuery,
+            @Param("searchEnabled") boolean searchEnabled,
+            Pageable pageable
+    );
 
     @Query(value = """
         SELECT COUNT(pt.post_id) FROM post_tags pt WHERE tags_id = :tagId
@@ -114,7 +138,9 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     """)
     List<Tag> searchTagByQuery(@Param("query") String query);
 
-    Long countAllByType(TagType type);
+    long countAllByType(TagType type);
+    long countAllByTypeAndCreatedAtBetween(TagType type, LocalDateTime createdAtAfter, LocalDateTime createdAtBefore);
+    long countAllByTrendingTrue();
 
-    Long countAllByTypeAndCreatedAtBetween(TagType type, LocalDateTime createdAtAfter, LocalDateTime createdAtBefore);
+
 }

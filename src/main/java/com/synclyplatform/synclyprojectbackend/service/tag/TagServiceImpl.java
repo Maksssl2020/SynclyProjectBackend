@@ -8,14 +8,22 @@ import com.synclyplatform.synclyprojectbackend.model.tag.Tag;
 import com.synclyplatform.synclyprojectbackend.model.tag.TagType;
 import com.synclyplatform.synclyprojectbackend.model.tag_category.TagCategory;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
+import com.synclyplatform.synclyprojectbackend.model.utils.TimestampSortOption;
+import com.synclyplatform.synclyprojectbackend.repository.PostRepository;
 import com.synclyplatform.synclyprojectbackend.repository.TagCategoryRepository;
 import com.synclyplatform.synclyprojectbackend.repository.TagRepository;
 import com.synclyplatform.synclyprojectbackend.mapper.TagMapper;
+import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import com.synclyplatform.synclyprojectbackend.service.activity.ActivityService;
+import com.synclyplatform.synclyprojectbackend.utils.Utils;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +34,8 @@ import java.util.stream.Collectors;
 public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
+    private final PostRepository postRepository;
+    private final UserRepository userRepository;
     private final TagCategoryRepository tagCategoryRepository;
     private final ActivityService activityService;
     private final TagMapper tagMapper;
@@ -102,10 +112,19 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<TagDTO> findAllTags() {
-        return tagRepository.findAll().stream()
-                .map(tagMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<TagDTO> findAllTags(int page, int size, String tagCategoryName, boolean trendingOnly, TimestampSortOption sortOption, String searchQuery) {
+        Sort sort = Utils.getTimestampSortOption(sortOption, "createdAt");
+
+        String normalizedCategory = tagCategoryName == null ? null : tagCategoryName.trim();
+        if (normalizedCategory != null && normalizedCategory.isBlank()) {
+            normalizedCategory = null;
+        }
+        String normalizedSearch = searchQuery == null ? "" : searchQuery.trim();
+        boolean searchEnabled = !normalizedSearch.isBlank();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return tagRepository.findAllTagsFiltered(normalizedCategory, trendingOnly, normalizedSearch, searchEnabled, pageable)
+                .map(tagMapper::toDTO);
     }
 
     @Override
@@ -185,6 +204,22 @@ public class TagServiceImpl implements TagService {
 
         tagRepository.save(foundTag);
     }
+
+    @Override
+    public TagStatsAdminDTO getTagAdminStats() {
+        long totalTags = tagRepository.count();
+        long totalTrendingTags = tagRepository.countAllByTrendingTrue();
+        long totalPosts = postRepository.countPostsWithAnyTag();
+        long totalUsers = userRepository.countUsersFollowingAnyTag();
+
+        return TagStatsAdminDTO.builder()
+                .totalTags(totalTags)
+                .totalTrendingTags(totalTrendingTags)
+                .totalFollowers(totalUsers)
+                .totalPosts(totalPosts)
+                .build();
+    }
+
 
     @Override
     public TagToEditDTO getTagToEditById(Long tagId) {

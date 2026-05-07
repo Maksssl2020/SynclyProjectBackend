@@ -25,6 +25,11 @@ public class TagCategoryController {
         return ResponseEntity.ok(tagCategoryService.findAll());
     }
 
+    @GetMapping("/names")
+    public ResponseEntity<List<String>> getAllTagCategoriesNames() {
+        return ResponseEntity.ok(tagCategoryService.getTagsCategoriesNames());
+    }
+
     @GetMapping("/{tagCategoryId}")
     public ResponseEntity<TagCategoryDTO> findByTagCategoryId(@PathVariable Long tagCategoryId) {
         return ResponseEntity.ok(tagCategoryService.findById(tagCategoryId));

@@ -2,8 +2,10 @@ package com.synclyplatform.synclyprojectbackend.controller;
 
 import com.synclyplatform.synclyprojectbackend.dto.tag.*;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
+import com.synclyplatform.synclyprojectbackend.model.utils.TimestampSortOption;
 import com.synclyplatform.synclyprojectbackend.service.tag.TagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +24,21 @@ public class TagController {
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ADMIN', 'MODERATOR')")
-    public ResponseEntity<List<TagDTO>> getAllTags() {
-        return ResponseEntity.ok(tagService.findAllTags());
+    public ResponseEntity<Page<TagDTO>> getAllTags(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String tagCategoryName,
+            @RequestParam(required = false, defaultValue = "false") boolean trendingOnly,
+            @RequestParam(required = false, defaultValue = "RECENT") TimestampSortOption sortOption,
+            @RequestParam(required = false) String searchQuery
+    ) {
+        return ResponseEntity.ok(tagService.findAllTags(page, size, tagCategoryName, trendingOnly, sortOption, searchQuery));
+    }
+
+    @GetMapping("/admin-stats")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MODERATOR')")
+    public ResponseEntity<TagStatsAdminDTO> getTagsAdminStats() {
+        return ResponseEntity.ok(tagService.getTagAdminStats());
     }
 
     @GetMapping("/enabled")
@@ -49,7 +64,7 @@ public class TagController {
 
     @GetMapping("/android-app")
     public ResponseEntity<List<TagDTO>> getAllTagsAndroidApp() {
-        return ResponseEntity.ok(tagService.findAllTags());
+        return ResponseEntity.ok(tagService.findAllEnabledTags());
     }
 
     @GetMapping("/popular")
@@ -104,8 +119,8 @@ public class TagController {
 
     @PatchMapping("/change-state")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity<HttpStatus> disableEnableTag(@AuthenticationPrincipal User adminUser, @RequestBody Long tagId) {
-        tagService.disableEnableTagById(adminUser, tagId);
+    public ResponseEntity<HttpStatus> disableEnableTag(@AuthenticationPrincipal User adminUser, @RequestBody ChangeTagStateRequestDTO changeTagState) {
+        tagService.disableEnableTagById(adminUser, changeTagState.tagId());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

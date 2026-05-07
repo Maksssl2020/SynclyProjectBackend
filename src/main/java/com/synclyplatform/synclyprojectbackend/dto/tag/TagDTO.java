@@ -19,6 +19,7 @@ public class TagDTO {
     private long followersCount;
     private int postsThisWeek;
     private boolean trending;
+    private boolean enabled;
     private String type;
     private String tagCategory;
     private String color;

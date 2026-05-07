@@ -14,4 +14,6 @@ public interface TagCategoryService {
     List<TagCategoryDTO> findAll();
     void save(User adminUser, TagCategoryRequestDTO tagCategoryRequestDTO);
     boolean tagCategoryExists(String name);
+
+    List<String> getTagsCategoriesNames();
 }

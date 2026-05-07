@@ -18,9 +18,7 @@ import java.util.Set;
 public interface PostRepository extends JpaRepository<Post,Long> {
 
     List<Post> findAllByAuthorUserId(Long userId);
-
     List<Post> findAllByTagsContaining(Tag tag, Pageable pageable);
-
     Long countByAuthorUserId(Long userId);
 
     @Query("SELECT p FROM Post p WHERE p.author.userId != :userId ORDER BY RANDOM()")
@@ -73,4 +71,11 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     Long findMaxPostId();
 
     Long countAllByCreatedAtBetween(LocalDateTime createdAtAfter, LocalDateTime createdAtBefore);
+
+    @Query("""
+        SELECT COUNT(DISTINCT p) FROM Post p
+        JOIN p.tags t
+        WHERE SIZE(p.tags) > 0
+    """)
+    long countPostsWithAnyTag();
 }

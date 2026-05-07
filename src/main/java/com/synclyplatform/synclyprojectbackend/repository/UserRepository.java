@@ -29,6 +29,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     @Query("""
+        SELECT COUNT(DISTINCT u) FROM User u
+        JOIN u.followedTags
+        WHERE SIZE(u.followedTags) > 0
+    """)
+    long countUsersFollowingAnyTag();
+
+    @Query("""
         SELECT COUNT(u) > 0 FROM User u WHERE
             u.userId = :userId AND
             u.role = 'ADMIN'
