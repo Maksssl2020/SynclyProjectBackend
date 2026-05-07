@@ -44,7 +44,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws")
                 .addInterceptors(jwtHandshakeInterceptor)
                 .setAllowedOrigins("http://localhost:5173")
+                .setAllowedOrigins("https://syncly-service.netlify.app/")
                 .setAllowedOriginPatterns("http://localhost:5173")
+                .setAllowedOriginPatterns("https://syncly-service.netlify.app/")
                 .withSockJS();
     }
 
