@@ -49,6 +49,8 @@ public class BeansConfig {
         config.addAllowedOrigin("http://localhost:5173");
         config.addAllowedOrigin("https://syncly-service.netlify.app");
         config.addAllowedOrigin("http://syncly-service.netlify.app");
+        config.addAllowedOrigin("https://syncly.com.pl/");
+        config.addAllowedOrigin("http://syncly.com.pl/");
         config.setAllowedHeaders(List.of(
                 HttpHeaders.ORIGIN,
                 HttpHeaders.CONTENT_TYPE,
