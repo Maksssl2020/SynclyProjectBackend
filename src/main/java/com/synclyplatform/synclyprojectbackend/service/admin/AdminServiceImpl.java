@@ -109,6 +109,28 @@ public class AdminServiceImpl implements AdminService {
         userRepository.save(foundUser);
     }
 
+    @Override
+    @Transactional
+    public void blockUserById(User adminUser, Long userId) {
+        User foundUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + userId + " not found"));
+        foundUser.setAccountNonLocked(false);
+
+        createUserActivity(adminUser, foundUser, ActivityActionType.BLOCKED);
+        userRepository.save(foundUser);
+    }
+
+    @Override
+    @Transactional
+    public void unblockUserById(User adminUser, Long userId) {
+        User foundUser = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + userId + " not found"));
+        foundUser.setAccountNonLocked(true);
+
+        createUserActivity(adminUser, foundUser, ActivityActionType.UNBLOCKED);
+        userRepository.save(foundUser);
+    }
+
     private void createUserActivity(
             User adminUser,
             User targetUser,

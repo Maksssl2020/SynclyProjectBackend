@@ -21,5 +21,5 @@ public interface UserService {
     List<UserDTO> searchUsers(String query);
     UserPresenceDTO getUserPresenceStatus(Long userId);
 
-    Page<AdminUserDTO> getAllUsers(int page, int size, UserRole userRole, UserStatus userStatus, String searchQuery, String sortBy, String sortDirection);
+    Page<AdminUserDTO> getAllUsers(int page, int size, UserRole userRole, UserStatus userStatus, String searchQuery);
 }

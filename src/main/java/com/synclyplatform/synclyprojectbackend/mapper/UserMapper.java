@@ -47,6 +47,7 @@ public class UserMapper {
                 .postCount(postCount)
                 .avatar(user.getUserProfile().getProfileImage())
                 .followersCount(user.getUserProfile().getFollowers().size())
+                .accountNonLocked(user.isAccountNonLocked())
                 .build();
     }
 }

@@ -10,4 +10,7 @@ public interface AdminService {
 
     AdminPanelStatisticsDTO getAdminStatistics();
     void updateUserAsAdmin(Long userId, User adminUser, UpdateUserDataAsAdminRequestDTO updateUserDataAsAdminRequestDTO);
+    void blockUserById(User adminUser, Long userId);
+    void unblockUserById(User adminUser, Long userId);
+
 }

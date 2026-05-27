@@ -23,4 +23,5 @@ public class AdminUserDTO {
     private long postCount;
     private long followersCount;
     private Image avatar;
+    private boolean accountNonLocked;
 }

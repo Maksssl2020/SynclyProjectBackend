@@ -59,4 +59,22 @@ public class AdminController {
         adminService.updateUserAsAdmin(userId, adminUser, updateUserDataAsAdminRequestDTO);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @PatchMapping("/user/block/{userId}")
+    public ResponseEntity<HttpStatus> blockUserProfile(
+            @AuthenticationPrincipal User adminUser,
+            @PathVariable Long userId
+    ) {
+        adminService.blockUserById(adminUser, userId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping("/user/unblock/{userId}")
+    public ResponseEntity<HttpStatus> unblockUser(
+            @AuthenticationPrincipal User adminUser,
+            @PathVariable Long userId
+    ) {
+        adminService.unblockUserById(adminUser, userId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

@@ -93,36 +93,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<AdminUserDTO> getAllUsers(int page, int size, UserRole userRole, UserStatus userStatus, String searchQuery, String sortBy, String sortDirection) {
+    public Page<AdminUserDTO> getAllUsers(int page, int size, UserRole userRole, UserStatus userStatus, String searchQuery) {
         String normalizedSearchQuery = searchQuery == null ? "" : searchQuery.trim();
         boolean searchEnabled = !normalizedSearchQuery.isBlank();
-        Pageable pageable = PageRequest.of(page, size);
 
-        log.info("sortBy: {}, direction: {}", sortBy, sortDirection);
-
-        if (!allowedUserSortFields.contains(sortBy)) {
-            sortBy = "createdAt";
-        }
-
-        if (sortBy.equals("followersCount")) {
-            Page<User> users = sortDirection.equals("asc")
-                    ? userRepository.findAllFilteredForAdminAndSortedByFollowersCountAsc(userRole, userStatus, normalizedSearchQuery, searchEnabled, pageable)
-                    : userRepository.findAllFilteredForAdminAndSortedByFollowersCountDesc(userRole, userStatus, normalizedSearchQuery, searchEnabled, pageable);
-
-            return users.map(userMapper::toAdminUserDTO);
-        }
-
-        if (sortBy.equals("postCount")) {
-            Page<User> users = sortDirection.equals("asc")
-                    ? userRepository.findAllFilteredForAdminAndSortedByPostCountAsc(userRole, userStatus, normalizedSearchQuery, searchEnabled, pageable)
-                    : userRepository.findAllFilteredForAdminAndSortedByPostCountDesc(userRole, userStatus, normalizedSearchQuery, searchEnabled, pageable);
-
-            return users.map(userMapper::toAdminUserDTO);
-        }
-
-        Sort sortOption = Sort.by(sortDirection.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC, sortBy);
-
-        pageable = PageRequest.of(page, size, sortOption);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<User> users = userRepository.findAllFilteredForAdmin(userRole, userStatus, normalizedSearchQuery, searchEnabled, pageable);
 
         return users.map(userMapper::toAdminUserDTO);

@@ -36,11 +36,9 @@ public class UserController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) UserRole userRole,
             @RequestParam(required = false) UserStatus userStatus,
-            @RequestParam(required = false, defaultValue = "createdAt") String sortBy,
-            @RequestParam(required = false, defaultValue = "desc") String sortDirection,
             @RequestParam(required = false) String searchQuery
     ) {
-        return new ResponseEntity<>(userService.getAllUsers(page, size, userRole, userStatus, searchQuery, sortBy, sortDirection), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getAllUsers(page, size, userRole, userStatus, searchQuery), HttpStatus.OK);
     }
 
     @MessageMapping("/user.disconnectUser")
