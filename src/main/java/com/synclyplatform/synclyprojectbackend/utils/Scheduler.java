@@ -22,7 +22,7 @@ public class Scheduler {
     private final DataGeneratorService dataGeneratorService;
     private final Random random = new Random();
 
-    @Scheduled(cron = "0 */30 * * * *")
+    @Scheduled(cron = "0 0 */2 * * *")
     public void generatePost() {
         List<Long> allUserIds = userRepository.findAllUserIds();
 
@@ -56,7 +56,7 @@ public class Scheduler {
         }
     }
 
-    @Scheduled(cron = "0 */45 * * * *")
+    @Scheduled(cron = "0 0 0 * * *")
     public void generateUser() throws Exception {
         int randomNumber = random.nextInt(10);
         int amountOfRandomUsers = 0;
