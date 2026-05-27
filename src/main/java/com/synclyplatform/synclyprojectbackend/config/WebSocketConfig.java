@@ -48,7 +48,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         "https://syncly.com.pl",
                         "https://syncly-service.netlify.app"
                 )
-                .withSockJS();
+                .withSockJS()
+                .setSessionCookieNeeded(false);
     }
 
     @Override
