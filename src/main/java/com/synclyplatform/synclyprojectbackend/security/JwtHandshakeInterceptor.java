@@ -9,6 +9,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
 
@@ -26,17 +27,26 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
             @NonNull WebSocketHandler wsHandler,
             @NonNull Map<String, Object> attributes
     ) {
-        log.info("HANDSHAKE!!!");
+        log.info("HANDSHAKE!!! URI: {}", request.getURI());
 
-        String authHeader = request.getHeaders().getFirst("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            log.info("Authentication Success");
-            String jwt = authHeader.substring(7);
-            String username = jwtService.extractUsername(jwt);
+        String token = UriComponentsBuilder
+                .fromUri(request.getURI())
+                .build()
+                .getQueryParams()
+                .getFirst("token");
 
-            if (username != null) {
-                attributes.put("username", username);
-            }
+        if (token == null || token.isBlank()) {
+            log.warn("No token in WebSocket handshake");
+            return true;
+        }
+
+        String username = jwtService.extractUsername(token);
+
+        if (username != null) {
+            log.info("WebSocket authenticated user: {}", username);
+            attributes.put("username", username);
+        } else {
+            log.warn("Could not extract username from token");
         }
 
         return true;

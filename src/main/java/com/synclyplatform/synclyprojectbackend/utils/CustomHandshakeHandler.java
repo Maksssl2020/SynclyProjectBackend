@@ -25,6 +25,7 @@ public class CustomHandshakeHandler extends DefaultHandshakeHandler {
             return null;
         }
 
+        System.out.println("Principal username: " + username);
         return new StompPrincipal(username);
     }
 }
