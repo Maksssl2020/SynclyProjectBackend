@@ -39,9 +39,21 @@ public class UserProfileController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @PostMapping("/android-app/upload/avatar/{userId}")
+    public ResponseEntity<Image> uploadAvatarAndroidApp(@RequestParam("file") MultipartFile file, @PathVariable Long userId) throws Exception {
+        Image avatar = userProfileService.uploadAvatar(file, userId);
+        return new ResponseEntity<>(avatar, HttpStatus.CREATED);
+    }
+
     @PatchMapping("/update/{userId}")
     public ResponseEntity<HttpStatus> updateUserProfile(@PathVariable Long userId, @ModelAttribute UserProfileUpdateRequestDTO userProfileUpdateRequest) throws Exception {
         userProfileService.updateUserProfile(userId, userProfileUpdateRequest);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/android-app/update/{userId}")
+    public ResponseEntity<AndroidUserProfileDTO> updateUserProfileAndroidApp(@PathVariable Long userId, @ModelAttribute UserProfileUpdateRequestDTO userProfileUpdateRequest) throws Exception {
+        AndroidUserProfileDTO updatedUserProfileAndroidApp = userProfileService.updateUserProfileAndroidApp(userId, userProfileUpdateRequest);
+        return new ResponseEntity<>(updatedUserProfileAndroidApp, HttpStatus.CREATED);
     }
 }

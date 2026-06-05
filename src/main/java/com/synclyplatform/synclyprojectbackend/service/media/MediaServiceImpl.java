@@ -31,13 +31,12 @@ import java.util.List;
 public class MediaServiceImpl implements MediaService {
 
     private final ImageRepository imageRepository;
-    private final VideoRepository videoRepository;
     private final UserProfileRepository userProfileRepository;
     private final PostRepository postRepository;
 
     @Override
     @Transactional
-    public void saveUserAvatar(Long userId, MultipartFile image) {
+    public Image saveUserAvatar(Long userId, MultipartFile image) {
         UserProfile userProfile = userProfileRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User profile not found."));
 
@@ -54,9 +53,11 @@ public class MediaServiceImpl implements MediaService {
                 imageRepository.delete(profileImage);
             }
 
-            imageRepository.save(imageEntity);
+            Image savedAvatar = imageRepository.save(imageEntity);
             userProfile.setProfileImage(imageEntity);
             userProfileRepository.save(userProfile);
+
+            return savedAvatar;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

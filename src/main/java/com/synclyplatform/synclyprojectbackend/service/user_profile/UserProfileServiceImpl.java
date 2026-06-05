@@ -67,13 +67,13 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public void uploadAvatar(MultipartFile avatarFile, Long userId) {
-        mediaService.saveUserAvatar(userId, avatarFile);
+    public Image uploadAvatar(MultipartFile avatarFile, Long userId) {
+        return mediaService.saveUserAvatar(userId, avatarFile);
     }
 
     @Override
     @Transactional
-    public void updateUserProfile(Long userId, UserProfileUpdateRequestDTO userProfileUpdateRequest) throws Exception {
+    public UserProfileDTO updateUserProfile(Long userId, UserProfileUpdateRequestDTO userProfileUpdateRequest) throws Exception {
         User foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new Exception("User Not Found."));
         UserProfile foundUserProfile = userProfileRepository.findByUser_UserId(userId)
@@ -98,7 +98,19 @@ public class UserProfileServiceImpl implements UserProfileService {
             foundUser.setUsername(userProfileUpdateRequest.getUsername());
         }
 
-        userProfileRepository.save(foundUserProfile);
+        UserProfile savedProfile = userProfileRepository.save(foundUserProfile);
         userRepository.save(foundUser);
+
+        return userProfileMapper.toDTO(savedProfile);
+    }
+
+    @Override
+    @Transactional
+    public AndroidUserProfileDTO updateUserProfileAndroidApp(Long userId, UserProfileUpdateRequestDTO userProfileUpdateRequest) throws Exception {
+        UserProfileDTO updatedUserProfile = updateUserProfile(userId, userProfileUpdateRequest);
+        Long postsCount = postRepository.countByAuthorUserId(userId);
+        Long friendsCount = friendRepository.countFriendsByUserId(userId);
+
+        return userProfileMapper.toAndroidUserProfileDTOFromUserProfileDTO(updatedUserProfile, postsCount, friendsCount);
     }
 }

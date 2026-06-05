@@ -16,6 +16,7 @@ public interface UserProfileService {
     AndroidUserProfileDTO findByUserIdAndroid(long userId);
     Image getUserProfileAvatar(long userId);
     UserProfile createUserProfile(UserProfileRequestDTO userProfileRequest) throws Exception;
-    void uploadAvatar(MultipartFile avatarFile, Long userId) throws Exception;
-    void updateUserProfile(Long userId, UserProfileUpdateRequestDTO userProfileUpdateRequest) throws Exception;
+    Image uploadAvatar(MultipartFile avatarFile, Long userId) throws Exception;
+    UserProfileDTO updateUserProfile(Long userId, UserProfileUpdateRequestDTO userProfileUpdateRequest) throws Exception;
+    AndroidUserProfileDTO updateUserProfileAndroidApp(Long userId, UserProfileUpdateRequestDTO userProfileUpdateRequest) throws Exception;
 }
