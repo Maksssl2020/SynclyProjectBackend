@@ -227,6 +227,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .userId(user.getUserId())
                 .username(user.getUsername())
                 .role(user.getRole().toString())
+                .avatar(user.getUserProfile().getProfileImage())
                 .build();
     }
 }
