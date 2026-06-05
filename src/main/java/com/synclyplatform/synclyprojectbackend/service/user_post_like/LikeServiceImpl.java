@@ -95,6 +95,13 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    public void unlikeUserProfile(long userId, long userProfileId) {
+        if (userUserProfileLikeRepository.existsByUserUserIdAndUserProfileUserProfileId(userId, userProfileId)) {
+            userUserProfileLikeRepository.deleteByUserUserIdAndUserProfileUserProfileId(userId, userProfileId);
+        }
+    }
+
+    @Override
     public void likePostComment(User user, long postCommentId) {
         if (userCommentLikeRepository.existsByPostCommentIdAndUserUserId(postCommentId, user.getUserId())) {
             return;

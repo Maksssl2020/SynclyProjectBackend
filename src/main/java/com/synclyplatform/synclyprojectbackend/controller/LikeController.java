@@ -75,4 +75,10 @@ public class LikeController {
         likeService.unlikePostComment(userId, commentId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @DeleteMapping("/android-app/unlike/user-profile")
+    public ResponseEntity<HttpStatus> unlikeUserProfileAndroidApp(@RequestParam("userId") Long userId, @RequestParam("userProfileId") Long userProfileId) {
+        likeService.unlikeUserProfile(userId, userProfileId);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
 }

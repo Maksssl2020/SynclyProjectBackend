@@ -20,4 +20,5 @@ public interface LikeService {
     void unlikePostComment(Long userId, long postCommentId);
 
     void likeUserProfile(long userId, long userProfileId);
+    void unlikeUserProfile(long userId, long userProfileId);
 }
