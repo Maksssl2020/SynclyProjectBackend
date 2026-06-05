@@ -46,6 +46,12 @@ public class LikeController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @PostMapping("/android-app/like/user-profile")
+    public ResponseEntity<HttpStatus> likeUserProfileAndroidApp(@RequestParam("userId") Long userId, @RequestParam("userProfileId") Long userProfileId) {
+        likeService.likeUserProfile(userId, userProfileId);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
     @DeleteMapping("/unlike/post")
     public ResponseEntity<HttpStatus> unlikePost(@AuthenticationPrincipal User user, @RequestParam("postId") Long postId) {
         likeService.unlikePost(user, postId);

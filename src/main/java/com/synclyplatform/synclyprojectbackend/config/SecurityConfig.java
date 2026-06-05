@@ -39,6 +39,7 @@ public class SecurityConfig {
                                 "/api/v1/friends/android-app/**",
                                 "/api/v1/friends/accept/request/**",
                                 "/api/v1/friends/decline/request/**",
+                                "/api/v1/friends/remove/friend/**",
                                 "/api/v1/users-profiles/android-app/**",
                                 "/api/v1/users/search/**",
                                 "/api/v1/posts/search/**",

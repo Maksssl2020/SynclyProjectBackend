@@ -66,6 +66,14 @@ public class FriendController {
         return new ResponseEntity<>(friendService.getRequestStatus(user.getUserId(), userId), HttpStatus.OK);
     }
 
+    @GetMapping("/android-app/request/status")
+    public ResponseEntity<String> getFriendRequestStatusAndroid(
+            @RequestParam("requesterId") Long requesterId,
+            @RequestParam("receiverId") Long receiverId
+    ) {
+        return new ResponseEntity<>(friendService.getRequestStatus(requesterId, receiverId), HttpStatus.OK);
+    }
+
     @GetMapping("/user/is-friend")
     public ResponseEntity<Boolean> checkIsFriend(@AuthenticationPrincipal User user, @RequestParam("userId") Long userId) {
         return new ResponseEntity<>(friendService.checkIsFriend(user, userId), HttpStatus.OK);
@@ -73,6 +81,15 @@ public class FriendController {
 
     @PostMapping("/send/request")
     public ResponseEntity<HttpStatus> sendFriendRequest(
+            @RequestParam("requesterId") Long requesterId,
+            @RequestParam("receiverId") Long receiverId
+    ) {
+        friendService.sendFriendRequest(requesterId, receiverId);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PostMapping("/android-app/send/request")
+    public ResponseEntity<HttpStatus> sendFriendRequestAndroid(
             @RequestParam("requesterId") Long requesterId,
             @RequestParam("receiverId") Long receiverId
     ) {
