@@ -1,5 +1,6 @@
 package com.synclyplatform.synclyprojectbackend.controller;
 
+import com.synclyplatform.synclyprojectbackend.dto.user_profile.AndroidUserProfileDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileUpdateRequestDTO;
 import com.synclyplatform.synclyprojectbackend.model.image.Image;
@@ -23,8 +24,8 @@ public class UserProfileController {
     }
 
     @GetMapping("/android-app/{userId}")
-    public ResponseEntity<UserProfileDTO> findUserProfileByUserIdForAndroidApp(@PathVariable Long userId) {
-        return new ResponseEntity<>(userProfileService.findByUserId(userId), HttpStatus.OK);
+    public ResponseEntity<AndroidUserProfileDTO> findUserProfileByUserIdForAndroidApp(@PathVariable Long userId) {
+        return new ResponseEntity<>(userProfileService.findByUserIdAndroid(userId), HttpStatus.OK);
     }
 
     @GetMapping("/{userId}/avatar")

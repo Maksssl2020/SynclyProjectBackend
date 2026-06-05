@@ -30,6 +30,13 @@ public interface FriendRepository extends JpaRepository<Friend, Long> {
     """)
     List<Friend> findFriendsOfUser(@Param("user")  User user);
 
+    @Query("""
+        SELECT COUNT(f) FROM Friend f
+        WHERE (f.requester.userId = :userId OR f.receiver.userId = :userId)
+        AND f.status = 'ACCEPTED'
+    """)
+    Long countFriendsByUserId(@Param("userId") Long userId);
+
     Optional<Friend> findByReceiverAndRequester(User receiver, User requester);
     Optional<Friend> findByRequesterUserIdAndReceiverUserId(Long requesterId, Long receiverId);
 

@@ -1,5 +1,6 @@
 package com.synclyplatform.synclyprojectbackend.service.user_profile;
 
+import com.synclyplatform.synclyprojectbackend.dto.user_profile.AndroidUserProfileDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileUpdateRequestDTO;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface UserProfileService {
 
     UserProfileDTO findByUserId(long userId);
+    AndroidUserProfileDTO findByUserIdAndroid(long userId);
     Image getUserProfileAvatar(long userId);
     UserProfile createUserProfile(UserProfileRequestDTO userProfileRequest) throws Exception;
     void uploadAvatar(MultipartFile avatarFile, Long userId) throws Exception;

@@ -1,11 +1,14 @@
 package com.synclyplatform.synclyprojectbackend.service.user_profile;
 
+import com.synclyplatform.synclyprojectbackend.dto.user_profile.AndroidUserProfileDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileUpdateRequestDTO;
 import com.synclyplatform.synclyprojectbackend.model.image.Image;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
 import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
+import com.synclyplatform.synclyprojectbackend.repository.FriendRepository;
+import com.synclyplatform.synclyprojectbackend.repository.PostRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserProfileRepository;
 import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import com.synclyplatform.synclyprojectbackend.service.media.MediaService;
@@ -23,14 +26,24 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserProfileMapper userProfileMapper;
     private final MediaService mediaService;
+    private final PostRepository postRepository;
+    private final FriendRepository friendRepository;
 
     @Override
-    @Transactional
     public UserProfileDTO findByUserId(long userId) {
         UserProfile foundUserProfile = userProfileRepository.findByUser_UserId(userId)
                 .orElseThrow(() -> new RuntimeException("User Profile Not Found!"));
 
         return userProfileMapper.toDTO(foundUserProfile);
+    }
+
+    @Override
+    public AndroidUserProfileDTO findByUserIdAndroid(long userId) {
+        UserProfileDTO foundProfile = findByUserId(userId);
+        Long postsCount = postRepository.countByAuthorUserId(userId);
+        Long friendsCount = friendRepository.countFriendsByUserId(userId);
+
+        return userProfileMapper.toAndroidUserProfileDTOFromUserProfileDTO(foundProfile,  postsCount, friendsCount);
     }
 
     @Override

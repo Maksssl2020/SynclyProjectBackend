@@ -1,5 +1,6 @@
 package com.synclyplatform.synclyprojectbackend.mapper;
 
+import com.synclyplatform.synclyprojectbackend.dto.user_profile.AndroidUserProfileDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user_profile.UserProfileDTO;
 import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
 import com.synclyplatform.synclyprojectbackend.repository.UserUserProfileLikeRepository;
@@ -32,6 +33,27 @@ public class UserProfileMapper {
                 .profileLikes(likesCount)
                 .followersCount(followersCount)
                 .followingCount(followedUsersCount)
+                .build();
+    }
+
+    public AndroidUserProfileDTO toAndroidUserProfileDTOFromUserProfileDTO(UserProfileDTO userProfileDTO, Long postsCount, Long friendsCount) {
+        return AndroidUserProfileDTO.builder()
+                .userProfileId(userProfileDTO.getUserProfileId())
+                .profileOwnerId(userProfileDTO.getProfileOwnerId())
+                .username(userProfileDTO.getUsername())
+                .email(userProfileDTO.getEmail())
+                .bio(userProfileDTO.getBio())
+                .joinedAt(userProfileDTO.getJoinedAt())
+                .birthday(userProfileDTO.getBirthday())
+                .displayName(userProfileDTO.getDisplayName())
+                .location(userProfileDTO.getLocation())
+                .avatar(userProfileDTO.getAvatar())
+                .website(userProfileDTO.getWebsite())
+                .profileLikes(userProfileDTO.getProfileLikes())
+                .followersCount(userProfileDTO.getFollowersCount())
+                .followingCount(userProfileDTO.getFollowingCount())
+                .postsCount(postsCount)
+                .friendsCount(friendsCount)
                 .build();
     }
 }
