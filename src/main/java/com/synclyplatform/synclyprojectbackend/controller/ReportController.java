@@ -1,5 +1,6 @@
 package com.synclyplatform.synclyprojectbackend.controller;
 
+import com.synclyplatform.synclyprojectbackend.dto.report.AndroidReportRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.report.ReportDTO;
 import com.synclyplatform.synclyprojectbackend.dto.report.ReportRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.report.ResolveReportRequestDTO;
@@ -30,6 +31,12 @@ public class ReportController {
     @PostMapping("/report")
     public ResponseEntity<HttpStatus> createReport(@RequestBody ReportRequestDTO reportRequestDTO, @AuthenticationPrincipal User user) {
         reportService.report(user, reportRequestDTO);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PostMapping("/android-app/report")
+    public ResponseEntity<HttpStatus> createReportAndroidApp(@RequestBody AndroidReportRequestDTO androidReportRequestDTO) {
+        reportService.report(androidReportRequestDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

@@ -1,6 +1,7 @@
 package com.synclyplatform.synclyprojectbackend.service.report;
 
 import com.synclyplatform.synclyprojectbackend.dto.activity.ActivityRequestDTO;
+import com.synclyplatform.synclyprojectbackend.dto.report.AndroidReportRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.report.ReportDTO;
 import com.synclyplatform.synclyprojectbackend.dto.report.ReportRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.report.ResolveReportRequestDTO;
@@ -33,6 +34,7 @@ public class ReportServiceImpl implements ReportService {
     private final PostCommentRepository postCommentRepository;
     private final ReportMapper reportMapper;
     private final ActivityService activityService;
+    private final UserRepository userRepository;
 
     @Override
     public List<ReportDTO> findAll() {
@@ -42,6 +44,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    @Transactional
     public void report(User user, ReportRequestDTO reportRequestDTO) {
         if (reportRequestDTO.getReportType().equals(ReportType.POST)) {
             if (postReportRepository.existsByReportedByUserIdAndPostId(user.getUserId(), reportRequestDTO.getEntityId())) {
@@ -83,6 +86,15 @@ public class ReportServiceImpl implements ReportService {
                         .targetType(ActivityTargetType.REPORT)
                         .build()
         );
+    }
+
+    @Override
+    @Transactional
+    public void report(AndroidReportRequestDTO androidReportRequestDTO) {
+        User foundUser = userRepository.findById(androidReportRequestDTO.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        report(foundUser, androidReportRequestDTO);
     }
 
     private ActivityActionType getActivityActionType(ReportStatus reportStatus) {

@@ -1,5 +1,6 @@
 package com.synclyplatform.synclyprojectbackend.service.report;
 
+import com.synclyplatform.synclyprojectbackend.dto.report.AndroidReportRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.report.ReportDTO;
 import com.synclyplatform.synclyprojectbackend.dto.report.ReportRequestDTO;
 import com.synclyplatform.synclyprojectbackend.dto.report.ResolveReportRequestDTO;
@@ -14,4 +15,5 @@ public interface ReportService {
     List<ReportDTO> findAll();
     void report(User user, ReportRequestDTO reportRequestDTO);
     void resolve(User user, ResolveReportRequestDTO resolveReportRequestDTO);
+    void report(AndroidReportRequestDTO androidReportRequestDTO);
 }

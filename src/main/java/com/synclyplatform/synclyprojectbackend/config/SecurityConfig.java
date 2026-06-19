@@ -55,6 +55,7 @@ public class SecurityConfig {
                                 "/api/v1/post-collections/android-app/**",
                                 "/api/v1/post-collections/save-post/**",
                                 "/api/v1/post-collections/unsave-post/by-post-collection/**",
+                                "/api/v1/reports/android-app/**",
                                 "/api/v1/media/**"
                         ).permitAll().anyRequest().authenticated()
                 )

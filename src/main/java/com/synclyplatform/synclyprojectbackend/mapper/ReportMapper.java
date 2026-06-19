@@ -1,9 +1,6 @@
 package com.synclyplatform.synclyprojectbackend.mapper;
 
-import com.synclyplatform.synclyprojectbackend.dto.report.CommentReportDTO;
-import com.synclyplatform.synclyprojectbackend.dto.report.PostReportDTO;
-import com.synclyplatform.synclyprojectbackend.dto.report.ReportDTO;
-import com.synclyplatform.synclyprojectbackend.dto.report.ReportType;
+import com.synclyplatform.synclyprojectbackend.dto.report.*;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
 import com.synclyplatform.synclyprojectbackend.model.report.CommentReport;
 import com.synclyplatform.synclyprojectbackend.model.report.PostReport;
@@ -31,6 +28,7 @@ public class ReportMapper {
 
         return ReportDTO.builder().build();
     }
+
     public PostReportDTO toPostReportDTO(PostReport postReport) {
         return PostReportDTO.builder()
                 .id(postReport.getId())

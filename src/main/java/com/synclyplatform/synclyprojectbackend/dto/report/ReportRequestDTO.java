@@ -2,13 +2,13 @@ package com.synclyplatform.synclyprojectbackend.dto.report;
 
 import com.synclyplatform.synclyprojectbackend.model.report.ReportReasonType;
 import com.synclyplatform.synclyprojectbackend.model.report.ReportType;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
-@AllArgsConstructor
+@Setter
+@Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class ReportRequestDTO {
 
     private Long entityId;
