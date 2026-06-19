@@ -10,6 +10,7 @@ import com.synclyplatform.synclyprojectbackend.model.user_profile.UserProfile;
 import com.synclyplatform.synclyprojectbackend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +33,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    @Transactional
     public void likePost(User user, long postId) {
         if (userPostLikeRepository.existsByPostIdAndUserUserId(postId, user.getUserId())) {
             return;
@@ -50,6 +52,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    @Transactional
     public void likePost(Long userId, long postId) {
         User foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -58,6 +61,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    @Transactional
     public void unlikePost(User user, long postId) {
         UserPostLike foundPostLike = userPostLikeRepository.findByUserAndPostId(user, postId)
                 .orElseThrow(() -> new RuntimeException("Post like not found."));
@@ -66,6 +70,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    @Transactional
     public void unlikePost(Long userId, long postId) {
         User foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -74,6 +79,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    @Transactional
     public void likeUserProfile(long userId, long userProfileId) {
         if (userUserProfileLikeRepository.existsByUserUserIdAndUserProfileUserProfileId(userId, userProfileId)) {
             return;
@@ -95,6 +101,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    @Transactional
     public void unlikeUserProfile(long userId, long userProfileId) {
         if (userUserProfileLikeRepository.existsByUserUserIdAndUserProfileUserProfileId(userId, userProfileId)) {
             userUserProfileLikeRepository.deleteByUserUserIdAndUserProfileUserProfileId(userId, userProfileId);
@@ -102,6 +109,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    @Transactional
     public void likePostComment(User user, long postCommentId) {
         if (userCommentLikeRepository.existsByPostCommentIdAndUserUserId(postCommentId, user.getUserId())) {
             return;
@@ -120,6 +128,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    @Transactional
     public void likePostComment(Long userId, long postCommentId) {
         User foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -128,6 +137,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    @Transactional
     public void unlikePostComment(User user, long postCommentId) {
         UserCommentLike foundPostCommentLike = userCommentLikeRepository.findByUserAndPostCommentId(user, postCommentId)
                 .orElseThrow(() -> new RuntimeException("Post comment like not found."));
@@ -136,6 +146,7 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    @Transactional
     public void unlikePostComment(Long userId, long postCommentId) {
         User foundUser = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
