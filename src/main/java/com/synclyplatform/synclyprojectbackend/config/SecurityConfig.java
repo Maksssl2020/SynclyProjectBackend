@@ -25,7 +25,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
@@ -54,6 +53,7 @@ public class SecurityConfig {
                                 "/api/v1/post-collections/all-by-user/**",
                                 "/api/v1/post-collections/android-app/**",
                                 "/api/v1/post-collections/save-post/**",
+                                "/api/v1/post-collections/create/**",
                                 "/api/v1/post-collections/unsave-post/by-post-collection/**",
                                 "/api/v1/reports/android-app/**",
                                 "/api/v1/media/**"
