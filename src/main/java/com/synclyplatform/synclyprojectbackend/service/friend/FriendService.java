@@ -1,6 +1,7 @@
 package com.synclyplatform.synclyprojectbackend.service.friend;
 
 import com.synclyplatform.synclyprojectbackend.dto.friend.FriendDTO;
+import com.synclyplatform.synclyprojectbackend.dto.friend.FriendRequestStatusDTO;
 import com.synclyplatform.synclyprojectbackend.dto.friend.FriendUserDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
 import com.synclyplatform.synclyprojectbackend.model.user.User;
@@ -24,7 +25,7 @@ public interface FriendService {
     List<FriendDTO> getSentRequests(Long userId);
     List<UserDTO> getSuggestedFriends(Long userId);
     List<Long> getUserFiendIds(Long userId);
-    String getRequestStatus(Long requesterId, Long receiverId);
+    FriendRequestStatusDTO getRequestStatus(Long requesterId, Long receiverId);
 
     Boolean checkIsFriend(User user, Long userId);
 }

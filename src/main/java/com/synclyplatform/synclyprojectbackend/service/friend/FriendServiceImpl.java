@@ -1,6 +1,7 @@
 package com.synclyplatform.synclyprojectbackend.service.friend;
 
 import com.synclyplatform.synclyprojectbackend.dto.friend.FriendDTO;
+import com.synclyplatform.synclyprojectbackend.dto.friend.FriendRequestStatusDTO;
 import com.synclyplatform.synclyprojectbackend.dto.friend.FriendUserDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
 import com.synclyplatform.synclyprojectbackend.model.friend.Friend;
@@ -194,14 +195,14 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
-    public String getRequestStatus(Long requesterId, Long receiverId) {
+    public FriendRequestStatusDTO getRequestStatus(Long requesterId, Long receiverId) {
         Optional<Friend> friendRequest = friendRepository.findByRequesterUserIdAndReceiverUserId(requesterId, receiverId);
 
         if (friendRequest.isPresent()) {
-            return friendRequest.get().getStatus().toString();
+            return FriendRequestStatusDTO.builder().friendStatus(friendRequest.get().getStatus()).build();
         }
 
-        return FriendStatus.NONE.toString();
+        return FriendRequestStatusDTO.builder().friendStatus(FriendStatus.NONE).build();
     }
 
     @Override

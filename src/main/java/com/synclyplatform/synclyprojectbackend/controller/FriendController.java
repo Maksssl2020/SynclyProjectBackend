@@ -1,6 +1,7 @@
 package com.synclyplatform.synclyprojectbackend.controller;
 
 import com.synclyplatform.synclyprojectbackend.dto.friend.FriendDTO;
+import com.synclyplatform.synclyprojectbackend.dto.friend.FriendRequestStatusDTO;
 import com.synclyplatform.synclyprojectbackend.dto.friend.FriendUserDTO;
 import com.synclyplatform.synclyprojectbackend.dto.user.UserDTO;
 import com.synclyplatform.synclyprojectbackend.model.friend.FriendStatus;
@@ -62,12 +63,12 @@ public class FriendController {
     }
 
     @GetMapping("/request/status/{userId}")
-    public ResponseEntity<String> getRequestStatus(@AuthenticationPrincipal User user, @PathVariable Long userId) {
+    public ResponseEntity<FriendRequestStatusDTO> getRequestStatus(@AuthenticationPrincipal User user, @PathVariable Long userId) {
         return new ResponseEntity<>(friendService.getRequestStatus(user.getUserId(), userId), HttpStatus.OK);
     }
 
     @GetMapping("/android-app/request/status")
-    public ResponseEntity<String> getFriendRequestStatusAndroid(
+    public ResponseEntity<FriendRequestStatusDTO> getFriendRequestStatusAndroid(
             @RequestParam("requesterId") Long requesterId,
             @RequestParam("receiverId") Long receiverId
     ) {
