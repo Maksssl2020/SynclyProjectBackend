@@ -9,7 +9,7 @@ import java.util.List;
 @Service
 public interface PostCollectionService {
 
-    void savePostCollection(Long userId, PostCollectionRequestDTO postCollectionRequest);
+    PostCollectionDTO savePostCollection(Long userId, PostCollectionRequestDTO postCollectionRequest);
     void savePostInCollection(Long postId, Long postCollectionId);
     void unsavePostFromCollection(Long postId, Long userId);
     void unsavePostFromCollectionByPostCollectionId(Long postId, Long postCollectionId);

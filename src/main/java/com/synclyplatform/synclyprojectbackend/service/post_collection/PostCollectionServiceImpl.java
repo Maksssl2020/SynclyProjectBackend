@@ -26,7 +26,7 @@ public class PostCollectionServiceImpl implements PostCollectionService {
     private final PostCollectionMapper postCollectionMapper;
 
     @Override
-    public void savePostCollection(Long userId, PostCollectionRequestDTO postCollectionRequest) {
+    public PostCollectionDTO savePostCollection(Long userId, PostCollectionRequestDTO postCollectionRequest) {
         if (existByNameAndUserId(userId, postCollectionRequest.getTitle())) {
             throw new RuntimeException("Post collection already exists.");
         }
@@ -43,6 +43,8 @@ public class PostCollectionServiceImpl implements PostCollectionService {
         PostCollection savedPostCollection = postCollectionRepository.save(postCollection);
         foundUser.getPostCollections().add(savedPostCollection);
         userRepository.save(foundUser);
+
+        return postCollectionMapper.toDTO(savedPostCollection);
     }
 
     @Override

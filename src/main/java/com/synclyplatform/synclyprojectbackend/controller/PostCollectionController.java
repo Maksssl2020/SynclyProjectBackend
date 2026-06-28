@@ -39,7 +39,7 @@ public class PostCollectionController {
     }
 
     @PostMapping("/create/{userId}")
-    public ResponseEntity<HttpStatus> createPostCollection(@PathVariable Long userId, @RequestBody PostCollectionRequestDTO postCollectionRequestDTO) {
+    public ResponseEntity<PostCollectionDTO> createPostCollection(@PathVariable Long userId, @RequestBody PostCollectionRequestDTO postCollectionRequestDTO) {
         postCollectionService.savePostCollection(userId, postCollectionRequestDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
