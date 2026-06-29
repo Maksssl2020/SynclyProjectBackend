@@ -12,6 +12,7 @@ import com.synclyplatform.synclyprojectbackend.repository.UserRepository;
 import com.synclyplatform.synclyprojectbackend.mapper.PostMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,10 +25,14 @@ public class PostCollectionServiceImpl implements PostCollectionService {
     private final PostRepository postRepository;
     private final PostCollectionRepository postCollectionRepository;
     private final PostCollectionMapper postCollectionMapper;
+    private static final String DEFAULT_COLLECTION_TITLE = "ALL";
 
     @Override
+    @Transactional
     public PostCollectionDTO savePostCollection(Long userId, PostCollectionRequestDTO postCollectionRequest) {
-        if (existByNameAndUserId(userId, postCollectionRequest.getTitle())) {
+        String title = postCollectionRequest.getTitle().trim();
+
+        if (existByNameAndUserId(userId, title)) {
             throw new RuntimeException("Post collection already exists.");
         }
 
@@ -35,67 +40,48 @@ public class PostCollectionServiceImpl implements PostCollectionService {
                 .orElseThrow(() -> new RuntimeException("User not found."));
 
         PostCollection postCollection = PostCollection.builder()
-                .title(postCollectionRequest.getTitle())
+                .title(title)
                 .color(postCollectionRequest.getColor())
                 .user(foundUser)
                 .build();
 
         PostCollection savedPostCollection = postCollectionRepository.save(postCollection);
-        foundUser.getPostCollections().add(savedPostCollection);
-        userRepository.save(foundUser);
 
         return postCollectionMapper.toDTO(savedPostCollection);
     }
 
     @Override
+    @Transactional
     public void savePostInCollection(Long postId, Long postCollectionId) {
         Post foundPost = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
-        PostCollection founPostCollection = postCollectionRepository.findById(postCollectionId)
+
+        PostCollection foundPostCollection = postCollectionRepository.findById(postCollectionId)
                 .orElseThrow(() -> new RuntimeException("Post collection not found"));
-        PostCollection defaultPostCollection = postCollectionRepository.findByUserUserIdAndTitle(founPostCollection.getUser().getUserId(), "ALL")
+
+        User user = foundPostCollection.getUser();
+
+        foundPostCollection.getPosts().add(foundPost);
+
+        PostCollection defaultPostCollection = postCollectionRepository
+                .findByUserUserIdAndTitle(user.getUserId(), DEFAULT_COLLECTION_TITLE)
                 .orElse(null);
-        User user = founPostCollection.getUser();
 
-        founPostCollection.getPosts().add(foundPost);
-
-        if (defaultPostCollection != null) {
+        if (defaultPostCollection != null && !defaultPostCollection.getPosts().contains(foundPost)) {
             defaultPostCollection.getPosts().add(foundPost);
             postCollectionRepository.save(defaultPostCollection);
         }
 
-        postCollectionRepository.save(founPostCollection);
         foundPost.getSavedByUsers().add(user);
         user.getSavedPosts().add(foundPost);
+
+        postCollectionRepository.save(foundPostCollection);
         userRepository.save(user);
         postRepository.save(foundPost);
     }
 
     @Override
-    public void unsavePostFromCollection(Long postId, Long userId) {
-        Post foundPost = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("Post not found"));
-        PostCollection founPostCollection = postCollectionRepository.findByUserUserIdAndPostsContaining(userId, foundPost)
-                .orElseThrow(() -> new RuntimeException("Post collection not found"));
-        PostCollection defaultPostCollection = postCollectionRepository.findByUserUserIdAndTitle(founPostCollection.getUser().getUserId(), "ALL")
-                .orElse(null);
-        User user = founPostCollection.getUser();
-
-        founPostCollection.getPosts().remove(foundPost);
-
-        if (defaultPostCollection != null) {
-            defaultPostCollection.getPosts().remove(foundPost);
-            postCollectionRepository.save(defaultPostCollection);
-        }
-
-        postCollectionRepository.save(founPostCollection);
-        foundPost.getSavedByUsers().remove(user);
-        user.getSavedPosts().remove(foundPost);
-        userRepository.save(user);
-        postRepository.save(foundPost);
-    }
-
-    @Override
+    @Transactional
     public void unsavePostFromCollectionByPostCollectionId(Long postId, Long postCollectionId) {
         Post foundPost = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -103,21 +89,33 @@ public class PostCollectionServiceImpl implements PostCollectionService {
                 .orElseThrow(() -> new RuntimeException("Post collection not found"));
         User user = foundPostCollection.getUser();
 
-        PostCollection defaultPostCollection = postCollectionRepository.findByUserUserIdAndTitle(user.getUserId(), "ALL")
-                .orElse(null);
-
         foundPostCollection.getPosts().remove(foundPost);
-
-        if (defaultPostCollection != null) {
-            defaultPostCollection.getPosts().remove(foundPost);
-            postCollectionRepository.save(defaultPostCollection);
-        }
-
         postCollectionRepository.save(foundPostCollection);
-        foundPost.getSavedByUsers().remove(user);
-        user.getSavedPosts().remove(foundPost);
-        userRepository.save(user);
-        postRepository.save(foundPost);
+
+        boolean stillSavedInOtherCollections = postCollectionRepository
+                .existsByUserUserIdAndPostsContainingAndIdNotAndTitleNot(
+                        user.getUserId(),
+                        foundPost,
+                        foundPostCollection.getId(),
+                        DEFAULT_COLLECTION_TITLE
+                );
+
+        if (!stillSavedInOtherCollections) {
+            PostCollection defaultPostCollection = postCollectionRepository
+                    .findByUserUserIdAndTitle(user.getUserId(), DEFAULT_COLLECTION_TITLE)
+                    .orElse(null);
+
+            if (defaultPostCollection != null) {
+                defaultPostCollection.getPosts().remove(foundPost);
+                postCollectionRepository.save(defaultPostCollection);
+            }
+
+            foundPost.getSavedByUsers().remove(user);
+            user.getSavedPosts().remove(foundPost);
+
+            userRepository.save(user);
+            postRepository.save(foundPost);
+        }
     }
 
     @Override

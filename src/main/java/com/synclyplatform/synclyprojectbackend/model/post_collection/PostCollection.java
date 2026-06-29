@@ -36,6 +36,7 @@ public class PostCollection {
     private User user;
 
     @ManyToMany
+    @Builder.Default
     @JoinTable(
             name = "post_collection_posts",
             joinColumns = @JoinColumn(name = "collection_id"),

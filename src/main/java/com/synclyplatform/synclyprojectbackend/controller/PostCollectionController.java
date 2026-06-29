@@ -50,12 +50,6 @@ public class PostCollectionController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/unsave-post/{userId}/{postId}")
-    public ResponseEntity<HttpStatus> unsavePostFromCollection(@PathVariable Long userId, @PathVariable Long postId) {
-        postCollectionService.unsavePostFromCollection(postId, userId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
     @DeleteMapping("/unsave-post/by-post-collection/{postCollectionId}/{postId}")
     public ResponseEntity<HttpStatus> unsavePostFromCollectionByPostCollectionId(@PathVariable Long postCollectionId, @PathVariable Long postId) {
         postCollectionService.unsavePostFromCollectionByPostCollectionId(postId, postCollectionId);

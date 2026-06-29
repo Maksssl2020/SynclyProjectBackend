@@ -18,4 +18,10 @@ public interface PostCollectionRepository extends JpaRepository<PostCollection, 
     Optional<PostCollection> findByUserUserIdAndPostsContaining(Long userUserId, Post post);
     Optional<PostCollection> findByIdAndPostsContaining(Long postCollectionId, Post post);
     boolean existsByUserUserIdAndTitle(Long userId, String title);
+    boolean existsByUserUserIdAndPostsContainingAndIdNotAndTitleNot(
+            Long userId,
+            Post post,
+            Long excludedCollectionId,
+            String excludedTitle
+    );
 }

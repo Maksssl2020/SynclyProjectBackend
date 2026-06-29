@@ -1,5 +1,6 @@
 package com.synclyplatform.synclyprojectbackend.dto.conversation;
 
+import com.synclyplatform.synclyprojectbackend.model.image.Image;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,11 +10,13 @@ import lombok.Setter;
 @Builder
 public class ConversationDTO {
     private Long id;
+    private Long senderId;
+    private Long recipientId;
+    private Long lastMessageSenderId;
     private String conversationId;
     private String senderUsername;
     private String recipientUsername;
     private String lastMessageContent;
     private String lastMessageTimestamp;
-    private Long senderId;
-    private Long recipientId;
+    private Image recipientAvatar;
 }

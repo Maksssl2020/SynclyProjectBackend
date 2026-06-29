@@ -28,16 +28,17 @@ public class ConversationServiceImpl implements ConversationService {
             String recipientUsername,
             boolean createNewConversationIfNotExists
     ) {
-        return conversationRepository.findBySenderUsernameAndRecipientUsername(senderUsername, recipientUsername)
-                .map(Conversation::getConversationId)
-                .or(() -> {
-                    if (createNewConversationIfNotExists) {
-                        String conversationId = save(senderUsername, recipientUsername);
-                        return Optional.of(conversationId);
-                    }
+        User sender = userRepository.findByUsername(senderUsername)
+                .orElseThrow(() -> new RuntimeException("Sender not found"));
 
-                    return  Optional.empty();
-                });
+        User recipient = userRepository.findByUsername(recipientUsername)
+                .orElseThrow(() -> new RuntimeException("Recipient not found"));
+
+        return getConversationId(
+                sender.getUserId(),
+                recipient.getUserId(),
+                createNewConversationIfNotExists
+        );
     }
 
     @Override
@@ -45,12 +46,12 @@ public class ConversationServiceImpl implements ConversationService {
         return conversationRepository.findBySenderIdAndRecipientId(senderId, recipientId)
                 .map(Conversation::getConversationId)
                 .or(() -> {
-                    if(createNewConversationIfNotExists) {
+                    if (createNewConversationIfNotExists) {
                         String conversationId = save(senderId, recipientId);
                         return Optional.of(conversationId);
                     }
 
-                    return  Optional.empty();
+                    return Optional.empty();
                 });
     }
 
@@ -68,28 +69,7 @@ public class ConversationServiceImpl implements ConversationService {
         User recipient = userRepository.findByUsername(recipientUsername)
                 .orElseThrow(() -> new RuntimeException("Recipient not found"));
 
-        String conversationId = String.format("%s_%s", senderUsername, recipientUsername);
-
-        Conversation senderRecipient = Conversation.builder()
-                .conversationId(conversationId)
-                .senderId(sender.getUserId())
-                .recipientId(recipient.getUserId())
-                .senderUsername(senderUsername)
-                .recipientUsername(recipientUsername)
-                .build();
-
-        Conversation recipientSender = Conversation.builder()
-                .conversationId(conversationId)
-                .senderId(recipient.getUserId())
-                .recipientId(sender.getUserId())
-                .senderUsername(recipientUsername)
-                .recipientUsername(senderUsername)
-                .build();
-
-        conversationRepository.save(senderRecipient);
-        conversationRepository.save(recipientSender);
-
-        return conversationId;
+        return save(sender.getUserId(),  recipient.getUserId());
     }
 
     @Override
@@ -99,42 +79,76 @@ public class ConversationServiceImpl implements ConversationService {
         User recipient = userRepository.findById(recipientId)
                 .orElseThrow(() -> new RuntimeException("Recipient not found"));
 
-        String conversationId = String.format("%s_%s", sender.getUsername(), recipient.getUsername());
+        String conversationId = buildConversationId(senderId, recipientId);
 
-        Conversation senderRecipient = Conversation.builder()
-                .conversationId(conversationId)
-                .senderId(sender.getUserId())
-                .recipientId(recipient.getUserId())
-                .senderUsername(sender.getUsername())
-                .recipientUsername(recipient.getUsername())
-                .build();
+        conversationRepository.findBySenderIdAndRecipientId(sender.getUserId(), recipient.getUserId())
+                .orElseGet(() -> conversationRepository.save(
+                        Conversation.builder()
+                                .conversationId(conversationId)
+                                .senderId(sender.getUserId())
+                                .recipientId(recipient.getUserId())
+                                .senderUsername(sender.getUsername())
+                                .recipientUsername(recipient.getUsername())
+                                .build()
+                ));
 
-        Conversation recipientSender = Conversation.builder()
-                .conversationId(conversationId)
-                .senderId(recipient.getUserId())
-                .recipientId(sender.getUserId())
-                .senderUsername(recipient.getUsername())
-                .recipientUsername(sender.getUsername())
-                .build();
-
-        conversationRepository.save(senderRecipient);
-        conversationRepository.save(recipientSender);
+        conversationRepository.findBySenderIdAndRecipientId(recipient.getUserId(), sender.getUserId())
+                .orElseGet(() -> conversationRepository.save(
+                        Conversation.builder()
+                                .conversationId(conversationId)
+                                .senderId(recipient.getUserId())
+                                .recipientId(sender.getUserId())
+                                .senderUsername(recipient.getUsername())
+                                .recipientUsername(sender.getUsername())
+                                .build()
+                ));
 
         return conversationId;
     }
 
+    private String buildConversationId(Long firstUserId, Long secondUserId) {
+        long first = Math.min(firstUserId, secondUserId);
+        long second = Math.max(firstUserId, secondUserId);
+
+        return first + "_" + second;
+    }
+
     private ConversationDTO toDTO(Conversation conversation) {
-        Optional<ConversationMessage> lastMessageByConversation = conversationMessageRepository.findLastMessageByConversation(conversation.getConversationId());
+        Optional<ConversationMessage> lastMessageByConversation =
+                conversationMessageRepository.findLastMessageByConversation(conversation.getConversationId());
+
+        User recipient = userRepository.findById(conversation.getRecipientId())
+                .orElse(null);
+
 
         return ConversationDTO.builder()
                 .id(conversation.getId())
-                .lastMessageContent(lastMessageByConversation.map(ConversationMessage::getContent).orElse(""))
-                .lastMessageTimestamp(lastMessageByConversation.map(ConversationMessage::getTimestamp).orElse(""))
-                .recipientId(conversation.getRecipientId())
+                .conversationId(conversation.getConversationId())
                 .senderId(conversation.getSenderId())
+                .recipientId(conversation.getRecipientId())
                 .senderUsername(conversation.getSenderUsername())
                 .recipientUsername(conversation.getRecipientUsername())
-                .conversationId(conversation.getConversationId())
+                .lastMessageContent(
+                        lastMessageByConversation
+                                .map(ConversationMessage::getContent)
+                                .orElse("")
+                )
+                .lastMessageTimestamp(
+                        lastMessageByConversation
+                                .map(ConversationMessage::getTimestamp)
+                                .orElse("")
+                )
+                .lastMessageSenderId(
+                        lastMessageByConversation
+                                .map(ConversationMessage::getSenderUserId)
+                                .orElse(null)
+                )
+
+                .recipientAvatar(
+                        recipient != null && recipient.getUserProfile() != null
+                                ? recipient.getUserProfile().getProfileImage()
+                                : null
+                )
                 .build();
     }
 }
