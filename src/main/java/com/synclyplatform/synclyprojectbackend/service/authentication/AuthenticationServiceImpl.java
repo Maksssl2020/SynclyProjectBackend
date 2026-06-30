@@ -194,7 +194,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         boolean isValid = twoFactorCodeService.verifyTwoFactorCode(foundUser.getUserId(), twoFactorVerificationRequest.getCode());
 
         if (!isValid) {
-            throw new Exception("Nieprawidłowe dane autoryzacji.");
+            throw new Exception("Invalid authentication data!");
         }
 
         loginHistoryService.saveLoginHistory(foundUser.getUserId(), httpServletRequest);
