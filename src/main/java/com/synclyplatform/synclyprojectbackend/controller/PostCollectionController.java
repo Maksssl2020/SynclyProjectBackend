@@ -27,7 +27,6 @@ public class PostCollectionController {
         return new ResponseEntity<>(postCollectionService.getPostCollectionById(postCollectionId), HttpStatus.OK);
     }
 
-
     @GetMapping("/all-by-user/{userId}")
     public ResponseEntity<List<PostCollectionDTO>> getAllPostCollectionsByUserId(@PathVariable Long userId) {
         return new ResponseEntity<>(postCollectionService.getPostCollectionByUserId(userId), HttpStatus.OK);
@@ -40,8 +39,8 @@ public class PostCollectionController {
 
     @PostMapping("/create/{userId}")
     public ResponseEntity<PostCollectionDTO> createPostCollection(@PathVariable Long userId, @RequestBody PostCollectionRequestDTO postCollectionRequestDTO) {
-        postCollectionService.savePostCollection(userId, postCollectionRequestDTO);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        PostCollectionDTO postCollectionDTO = postCollectionService.savePostCollection(userId, postCollectionRequestDTO);
+        return new ResponseEntity<>(postCollectionDTO, HttpStatus.CREATED);
     }
 
     @PostMapping("/save-post/{postCollectionId}")
